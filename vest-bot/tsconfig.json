@@ -1,15 +1,15 @@
 {
   "compilerOptions": {
-    "composite": true,
     "declaration": true,
     "target": "es2016",
     "module": "commonjs",
     "outDir": "./lib",
-    "rootDir": "./src",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
     "resolveJsonModule": true,
     "rootDirs": ["./src", "./resources"],
     "sourceMap": true,
     "incremental": true,
-    "tsBuildInfoFile": "./lib/.tsbuildinfo"
-  }
+    "tsBuildInfoFile": "./lib/.tsbuildinfo",
+  },
 }
