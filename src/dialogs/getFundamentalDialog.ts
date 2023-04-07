@@ -145,6 +145,57 @@ export class GetFundamentalDialog extends CancelAndHelpDialog {
     //     }
     // }
 
+        /**
+     * Complete the interaction and end the dialog.
+     */
+    private async finalStep(
+        stepContext: WaterfallStepContext<GetFundamentalDialogParameters>
+    ): Promise<DialogTurnResult> {
+        // handle fundamentalType prompt response
+        if (stepContext.result === MAX_RETRY_COUNT_EXCEEDED) {
+            return await stepContext.endDialog(
+                new MaxRetryCountExceededError('max retry count exceeded for fundamentalType prompt')
+            );
+        }
+        stepContext.options.fundamentalType = stepContext.result;
+
+        // DEBUG
+        // await stepContext.context.sendActivity(
+        //     `;
+        // stock: ${stepContext.options.stockSymbol},
+        // fundamentalType: ${stepContext.options.fundamentalType}`
+        // );
+
+        const getFundamentalResponse = await this.eodHistoricDataUtil.getFundamental(
+            stepContext.options.stockSymbol,
+            stepContext.options.fundamentalType
+        );
+
+        switch (stepContext.options.fundamentalType) {
+            case FundamentalType.ANALYST_RATING:
+                await this.handleAnalystRatingIntent(getFundamentalResponse, stepContext);
+                break;
+            case FundamentalType.DIVIDEND:
+                await this.handleDividendIntent(getFundamentalResponse, stepContext);
+                break;
+            case FundamentalType.EARNINGS:
+                await this.handleEarningsIntent(getFundamentalResponse, stepContext);
+                break;
+            case FundamentalType.MARKET_CAPITALIZATION:
+                await this.handleMarketCapIntent(getFundamentalResponse, stepContext);
+                break;
+            case FundamentalType.PRICE_EARNINGS_RATIO:
+                await this.handlePriceEarningsRatioIntent(getFundamentalResponse, stepContext);
+                break;
+            default:
+        }
+
+        // TODO: [VES-32] offer suggestions prompts
+
+        return await stepContext.endDialog(stepContext.options);
+    }
+
+
     private async handleAnalystRatingIntent(
         getFundamentalResponse: GetFundamentalResponse,
         stepContext: WaterfallStepContext<GetFundamentalDialogParameters>
@@ -158,8 +209,8 @@ export class GetFundamentalDialog extends CancelAndHelpDialog {
         } gave a sell rating, and ${resp.analystRating.StrongSell} gave a sell rating.
                 The average price target is ${resp.analystRating.TargetPrice}.
                 The estimated forward PE is ${
-                    resp.forwardPE
-                }. Here are more details on the forecasts for next quarter \n`;
+            resp.forwardPE
+        }. Here are more details on the forecasts for next quarter \n`;
 
         const table = BotResponseHelper.createAsciiTable([
             [
@@ -206,8 +257,8 @@ export class GetFundamentalDialog extends CancelAndHelpDialog {
             resp.annualDividendPerShareTTM
         } per share of dividends in the last 12 months. 
     The dividend yield, which is the dividends per share divided by the price per share, is ${
-        resp.dividendYield * 100
-    }%.
+            resp.dividendYield * 100
+        }%.
     \nFor ${new Date().getFullYear().toString()}, it is projected the annual dividend payout of ${symbol} is $${
             resp.forwardAnnualDividendRate
         } per share, and the dividend yield is ${resp.forwardAnnualDividendYield * 100}%.
@@ -372,7 +423,7 @@ export class GetFundamentalDialog extends CancelAndHelpDialog {
     ): Promise<void> {
         const messageText = `The market capitalization for ${stepContext.options.stockSymbol} is ${BotResponseHelper.getLargeNumberFormat(getFundamentalResponse as number)}`;
 
-         await stepContext.context.sendActivity(messageText);
+        await stepContext.context.sendActivity(messageText);
     }
 
     private async handlePriceEarningsRatioIntent(
@@ -392,55 +443,6 @@ export class GetFundamentalDialog extends CancelAndHelpDialog {
         await stepContext.context.sendActivity(messageText);
     }
 
-        /**
-     * Complete the interaction and end the dialog.
-     */
-    private async finalStep(
-        stepContext: WaterfallStepContext<GetFundamentalDialogParameters>
-    ): Promise<DialogTurnResult> {
-        // handle fundamentalType prompt response
-        if (stepContext.result === MAX_RETRY_COUNT_EXCEEDED) {
-            return await stepContext.endDialog(
-                new MaxRetryCountExceededError('max retry count exceeded for fundamentalType prompt')
-            );
-        }
-        stepContext.options.fundamentalType = stepContext.result;
-
-        // DEBUG
-        // await stepContext.context.sendActivity(
-        //     `;
-        // stock: ${stepContext.options.stockSymbol},
-        // fundamentalType: ${stepContext.options.fundamentalType}`
-        // );
-
-        const getFundamentalResponse = await this.eodHistoricDataUtil.getFundamental(
-            stepContext.options.stockSymbol,
-            stepContext.options.fundamentalType
-        );
-
-        switch (stepContext.options.fundamentalType) {
-            case FundamentalType.ANALYST_RATING:
-                await this.handleAnalystRatingIntent(getFundamentalResponse, stepContext);
-                break;
-            case FundamentalType.DIVIDEND:
-                await this.handleDividendIntent(getFundamentalResponse, stepContext);
-                break;
-            case FundamentalType.EARNINGS:
-                await this.handleEarningsIntent(getFundamentalResponse, stepContext);
-                break;
-            case FundamentalType.MARKET_CAPITALIZATION:
-                await this.handleMarketCapIntent(getFundamentalResponse, stepContext);
-                break;
-            case FundamentalType.PRICE_EARNINGS_RATIO:
-                await this.handlePriceEarningsRatioIntent(getFundamentalResponse, stepContext);
-                break;
-            default:
-        }
-
-        // TODO: [VES-32] offer suggestions prompts
-
-        return await stepContext.endDialog(stepContext.options);
-    }
 
     // TODO: add support for retrieval with date VES-30
     // private isAmbiguous(timex: string): boolean {

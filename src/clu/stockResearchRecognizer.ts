@@ -2,14 +2,16 @@ import { CluRecognizer } from './cluRecognizer';
 import { CluConfig } from './cluConfig';
 import {
     AnalyzeConversationResponse,
-    BaseResolutionUnion,
-    DateTimeResolution,
+    BaseResolutionUnion, ConversationPrediction,
+    DateTimeResolution, ListKey,
 } from '@azure/ai-language-conversations';
 import { Entity } from "../model/entityTypeMap";
 import { TurnContext } from 'botbuilder';
 import { Intent } from '../model/intent';
 import { InvalidIntentError } from '../error/InvalidIntentError';
 import { GetFundamentalDialogParameters } from "../model/fundamental/getFundamentalDialogParameters";
+import { FundamentalType } from '../model/fundamental/fundamentalType';
+import { VestUtil } from '../util/vestUtil';
 
 export class StockResearchRecognizer {
     private readonly recognizer: CluRecognizer;
@@ -57,19 +59,22 @@ export class StockResearchRecognizer {
         response: AnalyzeConversationResponse
     ): GetFundamentalDialogParameters {
         const getFundamentalRequest = new GetFundamentalDialogParameters();
-        // @ts-expect-error since the response is not strictly typed: BasePredictionUnion = ConversationPrediction | OrchestrationPrediction
-        response.result.prediction.entities.forEach((entity) => {
+
+        const entities = (response.result.prediction as ConversationPrediction).entities;
+        entities.forEach((entity) => {
             console.debug('extracted entity ' + JSON.stringify(entity));
-            switch (entity.category) {
+
+            switch (VestUtil.removeCapitalization(entity.category)) {
                 case Entity.STOCK:
                     getFundamentalRequest.stockSymbol = entity.text;
                     break;
                 case Entity.FUNDAMENTAL_TYPE:
                     getFundamentalRequest.fundamentalType =
-                        entity.extraInformation.filter(
+                        VestUtil.enumFromStringValue(FundamentalType, (entity.extraInformation.filter(
                             (extraInfo) =>
                                 extraInfo.extraInformationKind === 'ListKey'
-                        )[0].key;
+                        )[0] as ListKey).key);
+
                     break;
 
               // TODO: add support for retrieval with date VES-30
@@ -100,7 +105,7 @@ export class StockResearchRecognizer {
     public topIntent(response: AnalyzeConversationResponse): Intent {
         const topIntent = response.result.prediction.topIntent;
 
-        const intent = this.enumFromStringValue(Intent, topIntent);
+        const intent = VestUtil.enumFromStringValue(Intent, topIntent);
 
         if (intent) {
             return intent;
@@ -118,12 +123,6 @@ export class StockResearchRecognizer {
         if (!timex) return undefined;
 
         return timex;
-    }
-
-    private enumFromStringValue<T> (enm: { [s: string]: T}, value: string): T | undefined {
-        return (Object.values(enm) as unknown as string[]).includes(value)
-          ? value as unknown as T
-          : undefined;
     }
 
 }
