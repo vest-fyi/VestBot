@@ -35,6 +35,7 @@ export class DateResolverDialog extends CancelAndHelpDialog {
         this.initialDialogId = WATERFALL_DIALOG;
     }
 
+    // TODO: add retry limit VES-26
     private async initialStep(stepContext: WaterfallStepContext): Promise<DialogTurnResult> {
         const timex = (stepContext.options as any).date;
 

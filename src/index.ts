@@ -17,17 +17,18 @@ import { DialogAndWelcomeBot } from './bots/dialogAndWelcomeBot';
 import { MainDialog } from './dialogs/mainDialog';
 
 // The bot's booking dialog
-import { BookingDialog } from './dialogs/bookingDialog';
+import { GetFundamentalDialog } from './dialogs/getFundamentalDialog';
 
 // The helper-class recognizer that calls LUIS
-import { FlightBookingRecognizer } from './clu/flightBookingRecognizer';
 import { CluConfig } from './clu/cluConfig';
 
 import { config } from 'dotenv';
 import * as path from 'path';
+import { StockResearchRecognizer } from './clu/stockResearchRecognizer';
+import { Dialog } from "./model/dialog";
 
 // import env file
-const ENV_FILE = path.join(__dirname, '../..', '.env');
+const ENV_FILE = path.join(__dirname, '../', '.env');
 config({ path: ENV_FILE });
 
 const credentialsFactory = new ConfigurationServiceClientCredentialFactory({
@@ -82,22 +83,11 @@ const conversationState: ConversationState = new ConversationState(
 );
 const userState: UserState = new UserState(memoryStorage);
 
-// If configured, pass in the FlightBookingRecognizer. (Defining it externally allows it to be mocked for tests)
-const { CluAPIKey, CluAPIHostName, CluProjectName, CluDeploymentName } =
-    process.env;
-const cluConfig = new CluConfig({
-    endpointKey: CluAPIKey,
-    endpoint: `https://${CluAPIHostName}`,
-    projectName: CluProjectName,
-    deploymentName: CluDeploymentName,
-});
-
-const cluRecognizer = new FlightBookingRecognizer(cluConfig);
-
 // Create the main dialog.
-const BOOKING_DIALOG = 'bookingDialog';
-const bookingDialog = new BookingDialog(BOOKING_DIALOG);
-const dialog = new MainDialog(cluRecognizer, bookingDialog);
+const dialog = new MainDialog(
+    new StockResearchRecognizer(),
+    new GetFundamentalDialog(Dialog.GET_FUNDAMENTAL)
+);
 const bot = new DialogAndWelcomeBot(conversationState, userState, dialog);
 
 // Create HTTP server

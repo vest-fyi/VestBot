@@ -1,9 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { ActivityHandler, BotState, ConversationState, StatePropertyAccessor, UserState } from 'botbuilder';
+import {
+    ActivityHandler,
+    BotState,
+    ConversationState,
+    StatePropertyAccessor,
+    TurnContext,
+    UserState,
+} from 'botbuilder';
 import { Dialog, DialogState } from 'botbuilder-dialogs';
 import { MainDialog } from '../dialogs/mainDialog';
+import { AdaptiveCardInvokeResponse, AdaptiveCardInvokeValue } from "botframework-schema";
 
 export class DialogBot extends ActivityHandler {
     private conversationState: BotState;
@@ -34,8 +42,31 @@ export class DialogBot extends ActivityHandler {
         this.dialog = dialog;
         this.dialogState = this.conversationState.createProperty<DialogState>('DialogState');
 
+        // this.onTurn(async (context, next) => {
+        //     // call onAdaptiveCardInvoke if the activity is an invoke activity
+        //     if (context.activity.type === 'invoke') {
+        //         console.debug('Current context for invoke activity is ', context);
+        //         await this.onAdaptiveCardInvoke(
+        //             context,
+        //             context.activity as unknown as AdaptiveCardInvokeValue
+        //         );
+        //     }
+        //
+        //     await next();
+        // });
+        //
+        // this.onEvent(async (context, next) => {
+        //     console.debug('Current context is .', context);
+        //
+        //     // By calling next() you ensure that the next BotHandler is run.
+        //     await next();
+        //
+        // });
+
         this.onMessage(async (context, next) => {
             console.log('Running dialog with Message Activity.');
+
+            // console.debug('Current context is .', context);
 
             // Run the Dialog with the new message Activity.
             await (this.dialog as MainDialog).run(context, this.dialogState);
@@ -53,4 +84,20 @@ export class DialogBot extends ActivityHandler {
             await next();
         });
     }
+
+    protected onAdaptiveCardInvoke(
+      context: TurnContext,
+      invokeValue: AdaptiveCardInvokeValue
+    ): Promise<AdaptiveCardInvokeResponse> {
+        // console.debug('Current context is .', context);
+
+        return Promise.resolve({
+            "statusCode": 200,
+            "type": "<string>",
+            "value": {
+                "message": "Hello World"
+            }
+        });
+    }
 }
+

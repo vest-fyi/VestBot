@@ -21,12 +21,32 @@ export class CluRecognizer {
         this.CluTraceLabel = 'CLU Trace';
     }
 
+    /**
+     * Recognizes intents and entities in a user utterance in a turn context
+     * @param utterance
+     */
     async recognizeAsync(turnContext: TurnContext): Promise<AnalyzeConversationResponse> {
         const utterance = turnContext.activity.text;
         return await this.recognizeInternalAsync(utterance, turnContext);
     }
 
-    private async recognizeInternalAsync(utterance: string, turnContext: TurnContext): Promise<AnalyzeConversationResponse> {
+    /**
+     * Recognizes intents and entities in a user utterance.
+     * @param utterance
+     */
+    async recognizeUtteranceAsync(utterance: string): Promise<AnalyzeConversationResponse> {
+        return await this.recognizeInternalAsync(utterance);
+    }
+
+    /**
+     * Invoke CLU to recognize intents and entities in a user utterance.
+     * if turnContext is provided, send trace activity with CLU response.
+     *
+     * @param utterance
+     * @param turnContext
+     * @private
+     */
+    private async recognizeInternalAsync(utterance: string, turnContext?: TurnContext): Promise<AnalyzeConversationResponse> {
         const request: ConversationalTask =
         {
             analysisInput:
@@ -50,7 +70,10 @@ export class CluRecognizer {
 
         const traceInfo = { response: cluResponse };
 
-        await turnContext.sendTraceActivity('CLU Recognizer', traceInfo, this.CluTraceLabel);
+        if(turnContext){
+            await turnContext.sendTraceActivity('CLU Recognizer', traceInfo, this.CluTraceLabel);
+        }
+
         return cluResponse;
     }
 
