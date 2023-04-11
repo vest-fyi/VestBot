@@ -78,24 +78,24 @@ export interface EHDSymbol {
 
 export interface EHDGovernmentBondSymbol extends EHDSymbol {
   Exchange: 'GBOND'
-  Type: 'BOND'
+  Type: EHDSymbolType.BOND
 }
 
 export interface EHDCurrencySymbolType extends EHDSymbol {
   Country: 'Unknown'
   Exchange: 'MONEY'
-  Type: 'MONEY'
+  Type: EHDSymbolType.MONEY
 }
 
 export interface EHDIndexSymbol extends EHDSymbol {
   Exchange: 'INDX'
-  Type: 'INDEX'
+  Type: EHDSymbolType.INDEX
 }
 
 export interface EHDEUFundSymbol extends EHDSymbol {
   Country: 'Unknown'
   Exchange: 'EUFUND'
-  Type: 'FUND'
+  Type: EHDSymbolType.FUND
 }
 
 export interface EHDMacroEconomicIndicatorData {

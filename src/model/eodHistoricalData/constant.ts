@@ -100,15 +100,6 @@ export type EHDExchangeCode =
     | 'XETRA'
     | 'ZSE';
 
-export type EHDSymbolType =
-    | 'Common Stock'
-    | 'Currency'
-    | 'ETF'
-    | 'FUND'
-    | 'BOND'
-    | 'MONEY'
-    | 'INDEX';
-
 export type EHDCurrencyCode =
     | 'USD'
     | 'EUR'

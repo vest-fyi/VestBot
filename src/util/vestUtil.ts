@@ -14,4 +14,10 @@ export abstract class VestUtil {
         return firstLetter.toLowerCase() + restOfString; // convert the first letter to lowercase and concatenate with the rest of the string
     }
 
+    public static toSpaceSeparated(str: string): string {
+        let spacedString = str.replace(/([a-z])([A-Z])/g, '$1 $2');
+        spacedString = spacedString.replace(/_/g, ' ');
+        return spacedString.toLowerCase();
+    }
+
 }

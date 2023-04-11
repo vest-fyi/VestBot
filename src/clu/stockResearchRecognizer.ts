@@ -66,7 +66,7 @@ export class StockResearchRecognizer {
 
             switch (VestUtil.removeCapitalization(entity.category)) {
                 case Entity.STOCK:
-                    getFundamentalRequest.stockSymbol = entity.text;
+                    getFundamentalRequest.symbol = entity.text;
                     break;
                 case Entity.FUNDAMENTAL_TYPE:
                     getFundamentalRequest.fundamentalType =

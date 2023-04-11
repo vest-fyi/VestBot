@@ -6,7 +6,8 @@ import { AnalyzeConversationResponse } from '@azure/ai-language-conversations';
 import { EodHistoricalDataApiError } from "../error/EodHistoricalDataApiError";
 import { SymbolNotFoundError } from "../error/SymbolNotFoundError";
 import { EodHistoricDataUtil } from "../util/eodHistoricDataUtil";
-import { EHDSearchResult } from "./eodHistoricalData/model";
+import { EHDSearchResult } from "../model/eodHistoricalData/model";
+import { EHDSymbolType } from '../model/eodHistoricalData/literals';
 
 export enum PromptName {
     TEXT_PROMPT = 'textPrompt',
@@ -14,12 +15,18 @@ export enum PromptName {
     FUNDAMENTAL_TYPE_PROMPT = 'fundamentalTypePrompt',
 }
 
+
 export const PromptValidatorMap: Partial<
     Record<PromptName, PromptValidator<any>>
 > = {
     [PromptName.STOCK_PROMPT]: stockValidator,
     [PromptName.FUNDAMENTAL_TYPE_PROMPT]: fundamentalTypeValidator,
 };
+
+export type StockPromptValidatedResponse = {
+    stockSymbol: string;
+    stockType: EHDSymbolType;
+}
 
 /**
  * Validate the stock input. Override the promptContext.recognized.value with the stock symbol if the stock input is valid.
@@ -37,7 +44,10 @@ async function stockValidator(
                 await eodHistoricDataUtil.searchStock(stockInput);
 
             // update GetFundamentalDialogParameters.stockInput with stock symbol
-            promptContext.recognized.value = stock.Code;
+            promptContext.recognized.value = JSON.stringify({
+                stockSymbol: stock.Code + '.' + stock.Exchange,
+                stockType: stock.Type,
+            } as StockPromptValidatedResponse);
 
             return true;
         } catch (error) {
@@ -59,7 +69,7 @@ async function stockValidator(
     }
 
     await promptContext.context.sendActivity(
-        'Please try again with a valid company or fund name, or its stock symbol .'
+        'Please try again with a valid company or fund name, or its stock symbol. For symbols with \'.\', please use \'-\' instead. For example, BRK-B.'
     );
 
     return false;

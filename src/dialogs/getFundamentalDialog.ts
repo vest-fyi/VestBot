@@ -6,7 +6,7 @@ import { DialogTurnResult, TextPrompt, WaterfallDialog, WaterfallStepContext } f
 import { CancelAndHelpDialog } from './cancelAndHelpDialog';
 import { DateResolverDialog } from './dateResolverDialog';
 import { EodHistoricDataUtil, GetFundamentalResponse } from '../util/eodHistoricDataUtil';
-import { PromptName, PromptValidatorMap } from '../model/promptValidator';
+import { PromptName, PromptValidatorMap, StockPromptValidatedResponse } from './promptValidator';
 import { MAX_RETRY_COUNT_EXCEEDED } from '../util/constant';
 import { Dialog } from '../model/dialog';
 import { EodHistoricalDataApiError } from '../error/EodHistoricalDataApiError';
@@ -17,8 +17,13 @@ import { FundamentalType, fundamentalTypePromptName } from '../model/fundamental
 import { AnalystRating, getAnalystCount } from '../model/fundamental/analystRating';
 import { BotResponseHelper } from '../util/BotResponseHelper';
 import { EHDBeforeAfterMarket, EHDSearchResult } from '../model/eodHistoricalData/model';
-import { Earnings } from '../model/fundamental/earnings';
+import { StockEarnings } from '../model/fundamental/stockEarnings';
 import { DatetimeUtil } from '../util/datetime';
+import { SymbolIsFundError } from '../error/SymbolIsFundError';
+import { VestUtil } from '../util/vestUtil';
+import { EHDSymbolType } from '../model/eodHistoricalData/literals';
+import { FundEarnings } from '../model/fundamental/fundEarnings';
+import { FieldNotFoundError } from '../error/FieldNotFoundError';
 
 const DATE_RESOLVER_DIALOG = 'dateResolverDialog';
 const WATERFALL_DIALOG = 'waterfallDialog';
@@ -42,10 +47,8 @@ export class GetFundamentalDialog extends CancelAndHelpDialog {
             .addDialog(new DateResolverDialog(DATE_RESOLVER_DIALOG))
             .addDialog(
                 new WaterfallDialog(WATERFALL_DIALOG, [
-                    // TODO: add retry limit for each step VES-26
                     this.stockStep.bind(this),
                     this.fundamentalTypeStep.bind(this),
-                    // this.travelDateStep.bind(this),
                     this.finalStep.bind(this),
                 ])
             );
@@ -60,13 +63,17 @@ export class GetFundamentalDialog extends CancelAndHelpDialog {
     private async stockStep(
         stepContext: WaterfallStepContext<GetFundamentalDialogParameters>
     ): Promise<DialogTurnResult> {
-        if (stepContext.options.stockSymbol) {
+        if (stepContext.options.symbol) {
             // CLU recognized user stock input may be a company or fund name, or a stock symbol. Search for/validate the stock symbol with this input.
             try {
-                const stock: EHDSearchResult = await this.eodHistoricDataUtil.searchStock(
-                    stepContext.options.stockSymbol
+                const stock: EHDSearchResult = await this.eodHistoricDataUtil.searchStock(stepContext.options.symbol);
+
+                return await stepContext.next(
+                    `${JSON.stringify({
+                        stockSymbol: stock.Code + '.' + stock.Exchange,
+                        stockType: stock.Type,
+                    } as StockPromptValidatedResponse)}`
                 );
-                return await stepContext.next(stock.Code + stock.Exchange);
             } catch (error) {
                 console.error(error);
                 if (error instanceof EodHistoricalDataApiError) {
@@ -77,7 +84,7 @@ export class GetFundamentalDialog extends CancelAndHelpDialog {
                 }
                 if (error instanceof SymbolNotFoundError) {
                     await stepContext.context.sendActivity(
-                        `Sorry we cannot find the stock by the name of ${stepContext.options.stockSymbol}. Please try again.`
+                        `Sorry we cannot find the stock by the name of ${stepContext.options.symbol}. Please try again.`
                     );
                 }
                 console.error(error);
@@ -101,7 +108,10 @@ export class GetFundamentalDialog extends CancelAndHelpDialog {
                 new MaxRetryCountExceededError('max retry count exceeded for stock prompt')
             );
         }
-        stepContext.options.stockSymbol = stepContext.result;
+        const validatedStockPrompt = JSON.parse(stepContext.result) as StockPromptValidatedResponse;
+
+        stepContext.options.symbol = validatedStockPrompt.stockSymbol;
+        stepContext.options.stockType = validatedStockPrompt.stockType;
 
         // validate or prompt for fundamental type
         if (stepContext.options.fundamentalType) {
@@ -145,7 +155,7 @@ export class GetFundamentalDialog extends CancelAndHelpDialog {
     //     }
     // }
 
-        /**
+    /**
      * Complete the interaction and end the dialog.
      */
     private async finalStep(
@@ -159,42 +169,53 @@ export class GetFundamentalDialog extends CancelAndHelpDialog {
         }
         stepContext.options.fundamentalType = stepContext.result;
 
-        // DEBUG
-        // await stepContext.context.sendActivity(
-        //     `;
-        // stock: ${stepContext.options.stockSymbol},
-        // fundamentalType: ${stepContext.options.fundamentalType}`
-        // );
+        const { symbol, fundamentalType, stockType } = stepContext.options;
+        try {
+            const getFundamentalResponse = await this.eodHistoricDataUtil.getFundamental(
+                symbol,
+                fundamentalType,
+                stockType
+            );
+            switch (stepContext.options.fundamentalType) {
+                case FundamentalType.ANALYST_RATING: // TODO: [VES-35] handle ETF
+                    await this.handleAnalystRatingIntent(getFundamentalResponse, stepContext);
+                    break;
+                case FundamentalType.DIVIDEND: // TODO: [VES-35] handle ETF
+                    await this.handleDividendIntent(getFundamentalResponse, stepContext);
+                    break;
+                case FundamentalType.EARNINGS:
+                    await this.handleEarningsIntent(getFundamentalResponse, stepContext);
+                    break;
+                case FundamentalType.MARKET_CAPITALIZATION:
+                    await this.handleMarketCapIntent(getFundamentalResponse, stepContext);
+                    break;
+                case FundamentalType.PRICE_EARNINGS_RATIO:
+                    await this.handlePriceEarningsRatioIntent(getFundamentalResponse, stepContext);
+                    break;
+                default:
+            }
 
-        const getFundamentalResponse = await this.eodHistoricDataUtil.getFundamental(
-            stepContext.options.stockSymbol,
-            stepContext.options.fundamentalType
-        );
+            // TODO: [VES-32] offer suggestions prompts
 
-        switch (stepContext.options.fundamentalType) {
-            case FundamentalType.ANALYST_RATING:
-                await this.handleAnalystRatingIntent(getFundamentalResponse, stepContext);
-                break;
-            case FundamentalType.DIVIDEND:
-                await this.handleDividendIntent(getFundamentalResponse, stepContext);
-                break;
-            case FundamentalType.EARNINGS:
-                await this.handleEarningsIntent(getFundamentalResponse, stepContext);
-                break;
-            case FundamentalType.MARKET_CAPITALIZATION:
-                await this.handleMarketCapIntent(getFundamentalResponse, stepContext);
-                break;
-            case FundamentalType.PRICE_EARNINGS_RATIO:
-                await this.handlePriceEarningsRatioIntent(getFundamentalResponse, stepContext);
-                break;
-            default:
+            return await stepContext.endDialog(stepContext.options);
+        } catch (error) {
+            if (error instanceof EodHistoricalDataApiError) {
+                await stepContext.context.sendActivity(
+                    'Sorry our service is not available at the moment. Please try again later.'
+                );
+                return await stepContext.endDialog(error);
+            }
+
+            if (error instanceof SymbolIsFundError) {
+                await stepContext.context.sendActivity(
+                    `Sorry we cannot retrieve ${VestUtil.toSpaceSeparated(stepContext.options.fundamentalType)} for ${
+                        stepContext.options.symbol
+                    } because it is an ETF or managed fund.`
+                );
+                return await stepContext.endDialog(error);
+            }
         }
-
-        // TODO: [VES-32] offer suggestions prompts
-
-        return await stepContext.endDialog(stepContext.options);
     }
-
 
     private async handleAnalystRatingIntent(
         getFundamentalResponse: GetFundamentalResponse,
@@ -209,8 +230,8 @@ export class GetFundamentalDialog extends CancelAndHelpDialog {
         } gave a sell rating, and ${resp.analystRating.StrongSell} gave a sell rating.
                 The average price target is ${resp.analystRating.TargetPrice}.
                 The estimated forward PE is ${
-            resp.forwardPE
-        }. Here are more details on the forecasts for next quarter \n`;
+                    resp.forwardPE
+                }. Here are more details on the forecasts for next quarter \n`;
 
         const table = BotResponseHelper.createAsciiTable([
             [
@@ -250,15 +271,15 @@ export class GetFundamentalDialog extends CancelAndHelpDialog {
         getFundamentalResponse: GetFundamentalResponse,
         stepContext: WaterfallStepContext<GetFundamentalDialogParameters>
     ): Promise<void> {
-        const symbol = stepContext.options.stockSymbol;
+        const symbol = stepContext.options.symbol;
         const resp = getFundamentalResponse as Dividend;
 
-        const messageText = `${stepContext.options.stockSymbol} paid $${
+        const messageText = `${stepContext.options.symbol} paid $${
             resp.annualDividendPerShareTTM
         } per share of dividends in the last 12 months. 
     The dividend yield, which is the dividends per share divided by the price per share, is ${
-            resp.dividendYield * 100
-        }%.
+        resp.dividendYield * 100
+    }%.
     \nFor ${new Date().getFullYear().toString()}, it is projected the annual dividend payout of ${symbol} is $${
             resp.forwardAnnualDividendRate
         } per share, and the dividend yield is ${resp.forwardAnnualDividendYield * 100}%.
@@ -292,8 +313,42 @@ export class GetFundamentalDialog extends CancelAndHelpDialog {
         getFundamentalResponse: GetFundamentalResponse,
         stepContext: WaterfallStepContext<GetFundamentalDialogParameters>
     ): Promise<void> {
-        const symbol = stepContext.options.stockSymbol;
-        const resp = getFundamentalResponse as Earnings;
+        const { symbol, stockType } = stepContext.options;
+
+        let resp;
+        if (stockType !== EHDSymbolType.COMMON_STOCK) {
+            resp = getFundamentalResponse as FundEarnings;
+
+            const messageText = `${symbol} has seen a year-to-date return of ${
+                resp.ytdReturn
+            } in ${DatetimeUtil.getCurrentYear()}.
+            \n${symbol} has an expense ratio of ${
+                resp.expenseRatio * 100
+            }%. This means that for every $100 invested in the fund, $${
+                resp.expenseRatio * 100
+            } is paid to the fund's management team for managing the fund per year.
+            \nHere are some additional statistics for ${symbol}:`;
+
+            const tableData = [];
+            if (resp.oneYearReturn) {
+                tableData.push(['One Year Return', `${resp.oneYearReturn * 100}%`]);
+            }
+            if (resp.threeYearReturn) {
+                tableData.push(['Three Year Return', `${resp.threeYearReturn * 100}%`]);
+            }
+            if (resp.fiveYearReturn) {
+                tableData.push(['Five Year Return', `${resp.fiveYearReturn * 100}%`]);
+            }
+            if (resp.tenYearReturn) {
+                tableData.push(['Ten Year Return', `${resp.tenYearReturn * 100}%`]);
+            }
+            const table = BotResponseHelper.createAsciiTable(tableData);
+
+            await stepContext.context.sendActivity(messageText + '\n```\n' + table + '\n```\n');
+            return;
+        }
+
+        resp = getFundamentalResponse as StockEarnings;
 
         const messageText = `The last time ${symbol} reported earnings was on ${
             resp.previousQuarterEarnings.reportDate
@@ -314,7 +369,7 @@ export class GetFundamentalDialog extends CancelAndHelpDialog {
         \n Here are more details on earnings:\n 
          `;
 
-        const table = BotResponseHelper.createAsciiTable([
+        const tableData = [
             ['Profit Margin', (Number(resp.profitMargin) * 100).toFixed(2) + '%'],
             ['Return on Equity (Trailing 12 months)', (Number(resp.returnOnEquityTTM) * 100).toFixed(2) + '%'],
             [
@@ -392,16 +447,6 @@ export class GetFundamentalDialog extends CancelAndHelpDialog {
                 ),
             ],
             [
-                'Dividends Paid',
-                BotResponseHelper.getLargeNumberFormat(
-                    Number(
-                        this.trimLeadingDash(
-                            this.getFieldFromObjectArrayWithFallback(resp.previousQuarterCashFlows, 'dividendsPaid')
-                        )
-                    )
-                ),
-            ],
-            [
                 'Income Tax Expense',
                 BotResponseHelper.getLargeNumberFormat(
                     Number(
@@ -412,7 +457,25 @@ export class GetFundamentalDialog extends CancelAndHelpDialog {
                     )
                 ),
             ],
-        ]);
+        ];
+
+        // dividendsPaid can be null for some stocks such as BRK-A/B
+        try {
+            const dividendsField = this.getFieldFromObjectArrayWithFallback(
+                resp.previousQuarterCashFlows,
+                'dividendsPaid'
+            );
+            tableData.push([
+                'Dividends Paid',
+                BotResponseHelper.getLargeNumberFormat(Number(this.trimLeadingDash(dividendsField))),
+            ]);
+        } catch (error) {
+            if (!(error instanceof FieldNotFoundError)) {
+                throw error;    // unknown error
+            }
+        }
+
+        const table = BotResponseHelper.createAsciiTable(tableData);
 
         await stepContext.context.sendActivity(messageText + '\n```\n' + table + '\n```\n');
     }
@@ -421,7 +484,9 @@ export class GetFundamentalDialog extends CancelAndHelpDialog {
         getFundamentalResponse: GetFundamentalResponse,
         stepContext: WaterfallStepContext<GetFundamentalDialogParameters>
     ): Promise<void> {
-        const messageText = `The market capitalization for ${stepContext.options.stockSymbol} is ${BotResponseHelper.getLargeNumberFormat(getFundamentalResponse as number)}`;
+        const messageText = `The market capitalization for ${
+            stepContext.options.symbol
+        } is ${BotResponseHelper.getLargeNumberFormat(getFundamentalResponse as number)}`;
 
         await stepContext.context.sendActivity(messageText);
     }
@@ -430,19 +495,18 @@ export class GetFundamentalDialog extends CancelAndHelpDialog {
         getFundamentalResponse: GetFundamentalResponse,
         stepContext: WaterfallStepContext<GetFundamentalDialogParameters>
     ): Promise<void> {
-        const symbol = stepContext.options.stockSymbol;
+        const symbol = stepContext.options.symbol;
         const resp = getFundamentalResponse as PriceEarningsRatio;
         const messageText = `The price-to-earnings (PE) ratio for ${symbol} is ${resp.pe}.
         PE ratio is for valuing a company that measures its current share price relative to its earnings per share (EPS).
         A high P/E ratio could mean that a company's stock is overvalued, or that investors are expecting high growth rates in the future.
         \n\n${symbol} has a trailing PE ratio of ${resp.trailingPE} and a forward PE ratio of ${resp.forwardPE}.
         Trailing P/E is calculated by dividing the current market value, or share price, by the EPS over the previous 12 months.
-        The forward P/E ratio is calculated similarly based on the company's estimated EPS for the next 12 months. Estimations are produced by averaging Wall Street analysts' estimates.
+        Similarly, the forward P/E ratio is calculated based on the company's estimated EPS for the next 12 months. Estimations are produced by averaging Wall Street analysts' estimates.
         `;
 
         await stepContext.context.sendActivity(messageText);
     }
-
 
     // TODO: add support for retrieval with date VES-30
     // private isAmbiguous(timex: string): boolean {
@@ -454,6 +518,7 @@ export class GetFundamentalDialog extends CancelAndHelpDialog {
      * Retrieve the value of a field from the 1st object in an array, with a fallback to the second object in the array.
      * @param arr
      * @param fieldName
+     * @throws FieldNotFoundError if the field is not found in either object
      * @private
      */
     private getFieldFromObjectArrayWithFallback(arr: { [key: string]: any }[], fieldName: string): any {
@@ -466,7 +531,9 @@ export class GetFundamentalDialog extends CancelAndHelpDialog {
         } else if (arr[1] && arr[1][fieldName] !== null) {
             return arr[1][fieldName];
         } else {
-            throw new Error(`unable to retrieve field ${fieldName} from object array ${JSON.stringify(arr)}`);
+            throw new FieldNotFoundError(
+                `unable to retrieve field ${fieldName} from object array ${JSON.stringify(arr)}`
+            );
         }
     }
 }

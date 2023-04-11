@@ -3,12 +3,14 @@
 
 import { FundamentalType } from './fundamentalType';
 import { EHDSearchResult } from "../eodHistoricalData/model";
+import { EHDSymbolType } from '../eodHistoricalData/literals';
 
 export class GetFundamentalDialogParameters {
     // stock input from customer as recognized by CLU
-    public stockSymbol: string; // with exchange suffix. E.g., AAPL.US
+    public symbol: string; // with exchange suffix. E.g., AAPL.US
     public fundamentalType: FundamentalType;
     public stock: EHDSearchResult;
+    public stockType: EHDSymbolType
 
     // TODO: add support for retrieval with date VES-30
     // public fundamentalTimex?: string; // when user prompts for a specific fundamental data date or when user prompts for a fundamental data date range (serve as fundamentalStartTimex)

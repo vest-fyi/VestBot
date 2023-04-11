@@ -1266,14 +1266,15 @@ export type EHDSector =
 
 export type EHDSubscriptionType = 'monthly' | 'yearly'
 
-export type EHDSymbolType =
-  | 'Common Stock'
-  | 'Currency'
-  | 'ETF'
-  | 'FUND'
-  | 'BOND'
-  | 'MONEY'
-  | 'INDEX'
+export enum EHDSymbolType {
+    COMMON_STOCK = 'Common Stock',
+    CURRENCY = 'Currency',
+    ETF = 'ETF',
+    FUND = 'FUND',
+    BOND = 'BOND',
+    MONEY = 'MONEY',
+    INDEX = 'INDEX'
+}
 
 export type EHDScreenerOperation =
   | '='

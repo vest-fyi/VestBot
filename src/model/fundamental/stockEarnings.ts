@@ -1,12 +1,11 @@
 import {
   EHDBalanceSheet,
   EHDCashFlow,
-  EHDEarningsAnnual,
   EHDEarningsHistorical,
   EHDIncomeStatement
 } from "../eodHistoricalData/model";
 
-export interface Earnings {
+export interface StockEarnings {
   // Fundamentals::Highlights
   epsEstimateCurrentYear: number,
   epsEstimateNextYear: number,
