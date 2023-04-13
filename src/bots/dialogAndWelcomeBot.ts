@@ -20,6 +20,9 @@ export class DialogAndWelcomeBot extends DialogBot {
             const membersAdded = context.activity.membersAdded;
             for (const member of membersAdded) {
                 if (member.id !== context.activity.recipient.id) {
+                    // DEBUG
+                    console.debug('Loaded welcome card actions: ', WelcomeCard.actions);
+
                     const welcomeCard = CardFactory.adaptiveCard(WelcomeCard);
                     await context.sendActivity({ attachments: [welcomeCard] });
 

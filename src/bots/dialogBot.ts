@@ -41,7 +41,7 @@ export class DialogBot extends ActivityHandler {
         this.userState = userState as UserState;
         this.dialog = dialog;
         this.dialogState = this.conversationState.createProperty<DialogState>('DialogState');
-
+        //
         // this.onTurn(async (context, next) => {
         //     // call onAdaptiveCardInvoke if the activity is an invoke activity
         //     if (context.activity.type === 'invoke') {
@@ -66,7 +66,7 @@ export class DialogBot extends ActivityHandler {
         this.onMessage(async (context, next) => {
             console.log('Running dialog with Message Activity.');
 
-            // console.debug('Current context is .', context);
+            console.debug('Current context is: ', context);
 
             // Run the Dialog with the new message Activity.
             await (this.dialog as MainDialog).run(context, this.dialogState);
