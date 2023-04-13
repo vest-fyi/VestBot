@@ -1250,19 +1250,25 @@ export type EHDPaymentMethod = 'PayPal' | 'Stripe'
 
 export type EHDPeriod = 'Annual' | 'Quarterly'
 
-export type EHDSector =
-  | 'Basic Materials'
-  | 'Consumer Cyclical'
-  | 'Financial Services'
-  | 'Real Estate'
-  | 'Consumer Defensive'
-  | 'Healthcare'
-  | 'Utilities'
-  | 'Communication Services'
-  | 'Energy'
-  | 'Industrials'
-  | 'Technology'
-  | 'Other'
+export enum EHDSector {
+    BASIC_MATERIALS = 'Basic Materials',
+    COMMUNICATION_SERVICES = 'Communication Services',
+    CONGLOMERATES = 'Conglomerates',
+    CONSUMER_CYCLICAL = 'Consumer Cyclical',
+    CONSUMER_DEFENSIVE = 'Consumer Defensive',
+    CONSUMER_GOODS = 'Consumer Goods',
+    ENERGY = 'Energy',
+    FINANCIAL = 'Financial',
+    FINANCIAL_SERVICES = 'Financial Services',
+    HEALTHCARE = 'Healthcare',
+    INDUSTRIAL_GOODS = 'Industrial Goods',
+    INDUSTRIALS = 'Industrials',
+    OTHER = 'Other',
+    REAL_ESTATE = 'Real Estate',
+    SERVICES = 'Services',
+    TECHNOLOGY = 'Technology',
+    UTILITIES = 'Utilities',
+}
 
 export type EHDSubscriptionType = 'monthly' | 'yearly'
 
