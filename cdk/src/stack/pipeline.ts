@@ -24,7 +24,7 @@ export class PipelineStack extends Stack {
             trackingPackages: [
                 {
                     package: 'VestBot',
-                    branch: 'main',
+                    branch: 'VES-39',
                 },
                 {
                     package: 'VestCommonCDK',
