@@ -63,6 +63,7 @@ This bot uses [CLU](https://language.cognitive.azure.com/), an AI based cognitiv
   - alpha: `http://${ALPHA_BOT_DOMAIN}:80/api/messages`
   - else: `http://${BOT_DOMAIN}:443/api/messages`
 - download ngrok v2  (https://dl.equinox.io/ngrok/ngrok/stable/archive) and configure "Path to ngrok" in Bot Framework Emulator to its location via gear icon at the bottom left 
+  - latest ngrok is incompatible https://github.com/microsoft/BotFramework-Emulator/pull/2399 
 
 ## Further reading
 
