@@ -50,24 +50,19 @@ This bot uses [CLU](https://language.cognitive.azure.com/), an AI based cognitiv
 
 [Bot Framework Emulator](https://github.com/microsoft/botframework-emulator) is a desktop application that allows bot developers to test and debug their bots on localhost or running remotely through a tunnel.
 
-- Install the Bot Framework Emulator version 4.9.0 or greater from [here](https://github.com/Microsoft/BotFramework-Emulator/releases)
+- Install the Bot Framework Emulator version 4.9.0 or greater from [here](https://github.com/Microsoft/BotFramework-Emulator/releases) 
 
 ### Connect to the bot using Bot Framework Emulator
 
 - Launch Bot Framework Emulator
 - File -> Open Bot
-- Enter a Bot URL of `http://localhost:3978/api/messages`
+- Enter a Bot URL of `http://localhost:8080/api/messages`
 
-## Deploy the bot to Azure
-
-### Publishing Changes to Azure Bot Service
-
-    ```bash
-    # build the TypeScript bot before you publish
-    npm run build
-    ```
-
-To learn more about deploying a bot to Azure, see [Deploy your bot to Azure](https://aka.ms/azuredeployment) for a complete list of deployment instructions.
+### Connecting to a deployed bot
+- set the endpoint to the domain (http for alpha) 
+  - alpha: `http://${ALPHA_BOT_DOMAIN}:80/api/messages`
+  - else: `http://${BOT_DOMAIN}:443/api/messages`
+- download ngrok v2  (https://dl.equinox.io/ngrok/ngrok/stable/archive) and configure "Path to ngrok" in Bot Framework Emulator to its location via gear icon at the bottom left 
 
 ## Further reading
 
