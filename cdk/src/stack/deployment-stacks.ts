@@ -29,41 +29,41 @@ export class DeploymentStacks extends Stage {
         } = stackCreationInfo;
 
         const terminationProtection = stage !== STAGE.ALPHA; // Termination protection for non-DEV envs
-        // const enableHttps = stage !== STAGE.ALPHA;
+        const enableHttps = stage !== STAGE.ALPHA;
         const deploySecret = stage !== STAGE.ALPHA;   // Secret deployed for non-DEV envs. Alpha uses beta secrets
 
-        // this.vpc = new VpcStack(this, `${stackPrefix}-Vpc`, {
-        //     stackCreationInfo,
-        //     terminationProtection,
-        // });
-        //
-        // this.s3 = new S3Stack(this, `${stackPrefix}-S3`, {
-        //     stackCreationInfo,
-        //     terminationProtection,
-        // });
-        //
-        // if (enableHttps) {
-        //     this.dns = new DnsStack(this, `${stackPrefix}-Dns`, {
-        //         stackCreationInfo,
-        //         terminationProtection,
-        //     });
-        // }
-        //
-        // this.ecs = new EcsServiceStack(this, `${stackPrefix}-EcsService`, {
-        //     vpc: this.vpc,
-        //     dns: enableHttps ? this.dns : undefined,
-        //     s3: this.s3,
-        //     enableHttps,
-        //     stackCreationInfo,
-        //     terminationProtection,
-        // });
+        this.vpc = new VpcStack(this, `${stackPrefix}-Vpc`, {
+            stackCreationInfo,
+            terminationProtection,
+        });
+
+        this.s3 = new S3Stack(this, `${stackPrefix}-S3`, {
+            stackCreationInfo,
+            terminationProtection,
+        });
+
+        if (enableHttps) {
+            this.dns = new DnsStack(this, `${stackPrefix}-Dns`, {
+                stackCreationInfo,
+                terminationProtection,
+            });
+        }
+
+        this.ecs = new EcsServiceStack(this, `${stackPrefix}-EcsService`, {
+            vpc: this.vpc,
+            dns: enableHttps ? this.dns : undefined,
+            s3: this.s3,
+            enableHttps,
+            stackCreationInfo,
+            terminationProtection,
+        });
 
         if(deploySecret){
             this.secret = new SecretStack(this, `${stackPrefix}-Secret`, {
                 stackCreationInfo,
                 terminationProtection,
             });
-            // this.ecs.addDependency(this.secret);
+            this.ecs.addDependency(this.secret);
         }
 
     }
