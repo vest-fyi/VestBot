@@ -19,7 +19,6 @@ export class PipelineStack extends Stack {
     private createPipeline(): VestPipeline {
         const pipelineProps: VestPipelineProps = {
             service: SERVICE_NAME,
-            skipProdStages: true,
             prodManualApproval: false,
             trackingPackages: [
                 {
