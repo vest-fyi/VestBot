@@ -3,22 +3,17 @@ import { OrganizationPrincipal } from 'aws-cdk-lib/aws-iam';
 import { Key } from 'aws-cdk-lib/aws-kms';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
-import { StackCreationInfo, STAGE, VEST_ORGANIZATION_ID } from 'vest-common-cdk';
+import { StackCreationInfo, VEST_ORGANIZATION_ID } from 'vest-common-cdk';
 import { SERVICE_NAME } from '../../constant';
 
-export interface ParamSecretStackProps {
+export interface SecretStackProps {
     readonly stackCreationInfo: StackCreationInfo;
     readonly terminationProtection?: boolean;
 }
 
-export class ParamSecretStack extends Stack {
-    constructor(scope: Construct, id: string, props: ParamSecretStackProps) {
+export class SecretStack extends Stack {
+    constructor(scope: Construct, id: string, props: SecretStackProps) {
         super(scope, id, props);
-
-        const {stage} = props.stackCreationInfo;
-        if(stage === STAGE.ALPHA){
-            return;
-        }
 
         const orgPrincipal = new OrganizationPrincipal(VEST_ORGANIZATION_ID);
 
