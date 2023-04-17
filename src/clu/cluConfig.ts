@@ -22,8 +22,6 @@ export class CluConfig implements CluConfigInterface {
         this.endpointKey = config.endpointKey;
         this.endpoint = config.endpoint;
 
-        console.log('project name is ' + this.projectName);
-
         if (CluConfig.isNullOrWhitespace(this.projectName)) {
             throw new Error(
                 'projectName value is Null or whitespace. Please use a valid projectName.'

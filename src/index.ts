@@ -1,8 +1,8 @@
 import * as restify from 'restify';
 
 import {
-    CloudAdapter,
-    ConversationState,
+    CloudAdapter, ConfigurationServiceClientCredentialFactory,
+    ConversationState, createBotFrameworkAuthenticationFromConfiguration,
     MemoryStorage,
     UserState,
 } from 'botbuilder';
@@ -24,8 +24,13 @@ import { Stage } from './model/stage';
     config({ path: ENV_FILE });
     const healthCheckPath = process.env.HEALTH_CHECK_PATH;
 
+    const credentialsFactory = new ConfigurationServiceClientCredentialFactory();
+    const botFrameworkAuthentication =
+        createBotFrameworkAuthenticationFromConfiguration(null, credentialsFactory);
+
     // create an adapter to handle connectivity with the channels
-    const adapter = new CloudAdapter();
+    // See https://aka.ms/about-bot-adapter to learn more about adapters.
+    const adapter = new CloudAdapter(botFrameworkAuthentication);
 
     // Catch-all for errors.
     const onTurnErrorHandler = async (context, error) => {
