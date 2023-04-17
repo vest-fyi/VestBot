@@ -4,7 +4,7 @@ import {
   serviceDnsShortname,
   StackCreationInfo,
   STAGELESS_SERVICE,
-} from 'aha-common-cdk';
+} from 'vest-common-cdk';
 import { Stack } from 'aws-cdk-lib';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { Role } from 'aws-cdk-lib/aws-iam';
@@ -37,7 +37,7 @@ export class DnsStack extends Stack {
       region,
     } = stackCreationInfo;
 
-    const serviceDomain = `${ serviceDnsShortname.NftManagementService }.${ stage }.${ region }.${ DELEGATION_PARENT_DOMAIN }`;
+    const serviceDomain = `${ serviceDnsShortname.VestBot }.${ stage }.${ region }.${ DELEGATION_PARENT_DOMAIN }`;
 
     const subZone = new PublicHostedZone(this, `${ stage }${ SERVICE_NAME }Subdomain`, {
       zoneName: serviceDomain,
@@ -47,7 +47,7 @@ export class DnsStack extends Stack {
     const delegationRoleArn = Stack.of(this).formatArn({
       region: '', // IAM is global in each partition
       service: 'iam',
-      account: getStagelessServiceAccountId(STAGELESS_SERVICE.DNS_MANAGEMENT),
+      account: getStagelessServiceAccountId(STAGELESS_SERVICE.DNS),
       resource: 'role',
       resourceName: HOSTED_ZONE_DELEGATION_ROLE_NAME,
     });

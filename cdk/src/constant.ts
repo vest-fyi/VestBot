@@ -1,7 +1,5 @@
-import { SERVICE } from 'aha-common-cdk';
+import { STAGED_SERVICE } from 'vest-common-cdk';
 
-export const SERVICE_NAME = SERVICE.NFT_MGMT_SERVICE;
+export const SERVICE_NAME = STAGED_SERVICE.VEST_BOT;
 
-export const INTEGRATION_TEST_PKG_NAME = 'aha-nft-integration-test';
-
-export const HEALTH_CHECK_PATH = '/check';
+export const HEALTH_CHECK_PATH = '/health';

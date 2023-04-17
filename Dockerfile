@@ -1,6 +1,6 @@
 FROM --platform=linux/amd64 public.ecr.aws/docker/library/node:16.18
 
-#ENV NODE_ENV production
+ENV NODE_ENV production
 #ARG SSH_PRIVATE_KEY
 EXPOSE 8080
 

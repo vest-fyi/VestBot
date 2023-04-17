@@ -9,7 +9,8 @@ You will need AWS CLI (for credentials) and CDK CLI
 1. Install AWS CLI following [here](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html).
    Stop after 'Install/Update' subsection
     - Ensure your default profile is set with your IAM user credentials. `cat ~/.aws/config && cat ~/.aws/credentials`
-3. You will also need cdk cli. Test if `npx cdk --version` works.
+2. You will also need cdk cli. Test if `npx cdk --version` works.
+3. For credentials, we use SSO. You will need to install AWS SSO CLI plugin. Follow [this](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sso.html) to set up your SSO profile.
 
 ## Developing this package
 
@@ -32,7 +33,8 @@ Infrastructure changes should first be deployed and tested in the alpha account 
 
 1. Get creds for alpha account
     ```bash
-   export DEV_ACCOUNT=097554862356
+   export DEV_ACCOUNT=${ALPHA_AWS_ACCOUNT_ID}
+   aws configure sso
    . ../script/get-tmp-creds.sh
     ```
 2. Compile CDK code with either commands
@@ -51,10 +53,10 @@ Infrastructure changes should first be deployed and tested in the alpha account 
 
 alpha is considered 'test env', and thus excluded from pipeline stages (beta, gamma, prod).
 
-1. set DEV_ACCOUNT to the pipeline stack account (alpha account or beta account), get role profile
+1. set DEV_ACCOUNT to the pipeline stack account (service beta account), get role profile
     ```bash
-    export DEV_ACCOUNT=[ACCOUNT_NUMBER]
-    aws configure sso # select beta account
+    export DEV_ACCOUNT=${ALPHA_AWS_ACCOUNT_ID}
+    aws configure sso
     . ../script/get-tmp-creds.sh
     ```
 
