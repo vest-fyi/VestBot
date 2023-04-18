@@ -5,25 +5,57 @@ import {
     BaseResolutionUnion, ConversationPrediction,
     DateTimeResolution, ListKey,
 } from '@azure/ai-language-conversations';
-import { Entity } from "../model/entityTypeMap";
+import { Entity } from '../model/entityTypeMap';
 import { TurnContext } from 'botbuilder';
 import { Intent } from '../model/intent';
 import { InvalidIntentError } from '../error/InvalidIntentError';
-import { GetFundamentalDialogParameters } from "../model/fundamental/getFundamentalDialogParameters";
+import { GetFundamentalDialogParameters } from '../model/fundamental/getFundamentalDialogParameters';
 import { FundamentalType } from '../model/fundamental/fundamentalType';
 import { VestUtil } from '../util/vestUtil';
+import { Stage } from '../model/stage';
+import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
+import { BETA_SERVER_SECRET_ARN, SERVER_SECRET, VEST_DEFAULT_REGION } from '../util/constant';
+import { SecretsManagerUtil } from '../util/secrets-manager';
 
 export class StockResearchRecognizer {
-    private readonly recognizer: CluRecognizer;
+    private recognizer: CluRecognizer;
 
-    public constructor() {
-        const { CluAPIKey, CluAPIHostName, CluProjectName, CluDeploymentName } =
-            process.env;
+    /**
+     * Initialize the recognizer. workaround for async not callable in constructor
+     *
+     * @returns {Promise<void>}
+     */
+    public async init(): Promise<StockResearchRecognizer> {
+        let cluAPIKey, cluAPIHostName, cluProjectName, cluDeploymentName;
+
+        // bring your own .env file for local testing
+        if (process.env.STAGE == Stage.LOCAL || !process.env.STAGE) {
+            cluAPIKey = process.env.CluAPIKey;
+            cluAPIHostName = process.env.CluAPIHostName;
+            cluProjectName = process.env.CluProjectName;
+            cluDeploymentName = process.env.CluDeploymentName;
+        } else {
+            const client = new SecretsManagerClient({ region: VEST_DEFAULT_REGION });
+            const secretMgr = new SecretsManagerUtil(client);
+
+            const serverSecret = await secretMgr.getServerSecret(process.env.STAGE == Stage.ALPHA ? BETA_SERVER_SECRET_ARN : SERVER_SECRET);
+            console.debug('serverSecret: ' + JSON.stringify(serverSecret));
+            cluAPIKey = serverSecret.CluAPIKey;
+            cluAPIHostName = serverSecret.CluAPIHostName;
+            cluProjectName = serverSecret.CluProjectName;
+            cluDeploymentName = serverSecret.CluDeploymentName;
+
+            console.debug('cluAPIKey: ' + cluAPIKey);
+            console.debug('cluAPIHostName: ' + cluAPIHostName);
+            console.debug('cluProjectName: ' + cluProjectName);
+            console.debug('cluDeploymentName: ' + cluDeploymentName);
+        }
+
         const cluConfig = new CluConfig({
-            endpointKey: CluAPIKey,
-            endpoint: `https://${CluAPIHostName}`,
-            projectName: CluProjectName,
-            deploymentName: CluDeploymentName,
+            endpointKey: cluAPIKey,
+            endpoint: `https://${cluAPIHostName}`,
+            projectName: cluProjectName,
+            deploymentName: cluDeploymentName,
         });
 
         this.recognizer = new CluRecognizer(cluConfig);
@@ -33,6 +65,8 @@ export class StockResearchRecognizer {
                 'FlightBookingRecognizer is not configured. Please check your configuration.'
             );
         }
+
+        return this;
     }
 
     /**
@@ -77,8 +111,8 @@ export class StockResearchRecognizer {
 
                     break;
 
-              // TODO: add support for retrieval with date VES-30
-              // case Entity.DATA_DATE:
+                // TODO: add support for retrieval with date VES-30
+                // case Entity.DATA_DATE:
                 //     getFundamentalRequest.fundamentalTimex =
                 //         StockResearchRecognizer.getTimexFromDatetimeEntity(
                 //             entity.resolution

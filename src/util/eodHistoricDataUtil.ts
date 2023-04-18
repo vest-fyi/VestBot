@@ -1,6 +1,4 @@
 import qs from 'qs';
-import path from 'path';
-import { config } from 'dotenv';
 import axios from 'axios';
 import { EOD_HISTORICAL_DATA_BASE_URL, EOD_HISTORICAL_DATA_ENDPOINT } from '../model/eodHistoricalData/constant';
 import { SymbolNotFoundError } from '../error/SymbolNotFoundError';
@@ -20,29 +18,56 @@ import { FundamentalType } from '../model/fundamental/fundamentalType';
 import { CalendarEarningsResponse } from '../model/eodHistoricalData/modules/calendar';
 import { NoEarningsError } from '../error/NoEarningsError';
 import { StockEarnings } from '../model/fundamental/stockEarnings';
-import { NoPEError } from '../error/NoPEError';
 import { AnalystRating } from '../model/fundamental/analystRating';
 import { NoAnalystRatingError } from '../error/NoAnalystRatingError';
 import { DatetimeUtil } from './datetime';
 import { EHDSymbolType } from '../model/eodHistoricalData/literals';
 import { EodHistoricalDataResponseError } from '../error/EodHistoricalDataResponseError';
 import { FundEarnings } from '../model/fundamental/fundEarnings';
+import { Stage } from '../model/stage';
+import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
+import { BETA_SERVER_SECRET_ARN, SERVER_SECRET, VEST_DEFAULT_REGION } from './constant';
+import { SecretsManagerUtil } from './secrets-manager';
 
-export type GetFundamentalResponse = number | StockEarnings | FundEarnings | AnalystRating | Dividend | PriceEarningsRatio;
+export type GetFundamentalResponse =
+    number
+    | StockEarnings
+    | FundEarnings
+    | AnalystRating
+    | Dividend
+    | PriceEarningsRatio;
 
 export class EodHistoricDataUtil {
-    private readonly apiToken: string;
+    private apiToken: string;
 
-    public constructor() {
-        const ENV_FILE = path.join(__dirname, '../../.env');
-        config({ path: ENV_FILE });
-        const { EODHistoricalDataAPIKey } = process.env;
+    private isInitialized(){
+        return this.apiToken != undefined;
+    }
+    /**
+     * Constructor for EodHistoricDataUtil
+     *
+     * @Return {EodHistoricDataUtil} - EodHistoricDataUtil initialized class instance
+     */
+    public async init(): Promise<EodHistoricDataUtil> {
+        // bring your own .env file for local testing
+        if (process.env.STAGE == Stage.LOCAL || !process.env.STAGE) {
+            const { EODHistoricalDataAPIKey } = process.env;
+            this.apiToken = EODHistoricalDataAPIKey;
+        } else {
+            const client = new SecretsManagerClient({ region: VEST_DEFAULT_REGION });
+            const secretMgr = new SecretsManagerUtil(client);
 
-        this.apiToken = EODHistoricalDataAPIKey;
+            const serverSecret = await secretMgr.getServerSecret(process.env.STAGE == Stage.ALPHA ? BETA_SERVER_SECRET_ARN : SERVER_SECRET);
+            console.debug('serverSecret: ' + JSON.stringify(serverSecret));
 
-        if (!this.apiToken) {
+            this.apiToken = serverSecret.EODHistoricalDataAPIKey;
+        }
+
+        if (!this.isInitialized()) {
             throw new Error('No token provided');
         }
+
+        return this;
     }
 
     /**
@@ -55,6 +80,10 @@ export class EodHistoricDataUtil {
      */
     public async searchStock(stock: string): Promise<EHDSearchResult> {
         try {
+            if (!this.isInitialized()) {
+                await this.init();
+            }
+
             const response = (await this.fetchEodHistoricalData(`${EOD_HISTORICAL_DATA_ENDPOINT.SEARCH}/${stock}`, {
                 exchange: 'US',
             })) as EHDSearchResponse;
@@ -90,6 +119,10 @@ export class EodHistoricDataUtil {
         date?: Date
     ): Promise<GetFundamentalResponse> {
         try {
+            if (!this.isInitialized()) {
+                await this.init();
+            }
+
             switch (fundamentalType) {
                 case FundamentalType.MARKET_CAPITALIZATION:
                     if (stockType !== EHDSymbolType.COMMON_STOCK) {
@@ -122,6 +155,10 @@ export class EodHistoricDataUtil {
     }
 
     private async getMarketCapForGetFundamental(symbol: string): Promise<number> {
+        if (!this.isInitialized()) {
+            await this.init();
+        }
+
         const response = await this.fetchEodHistoricalData(`${EOD_HISTORICAL_DATA_ENDPOINT.FUNDAMENTALS}/${symbol}`, {
             filter: 'Highlights::MarketCapitalization',
         });
@@ -179,13 +216,13 @@ export class EodHistoricDataUtil {
             previousQuarterEarnings: response[earningsHistoryKey],
 
             // Financials::Balance_Sheet::quarterly
-            previousQuarterBalanceSheets: [response[balanceSheetKey], response[previousBalanceSheetKey]],
+            previousQuarterBalanceSheets: [ response[balanceSheetKey], response[previousBalanceSheetKey] ],
 
             // Financials::Cash_Flow::quarterly
-            previousQuarterCashFlows: [response[cashFlowKey], response[previousCashFlowKey]],
+            previousQuarterCashFlows: [ response[cashFlowKey], response[previousCashFlowKey] ],
 
             // Financials::Income_Statement::quarterly
-            previousQuarterIncomeStatements: [response[incomeStatementKey], response[previousIncomeStatementKey]],
+            previousQuarterIncomeStatements: [ response[incomeStatementKey], response[previousIncomeStatementKey] ],
         } as StockEarnings;
     }
 
