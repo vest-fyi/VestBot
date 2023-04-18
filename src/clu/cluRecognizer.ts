@@ -1,14 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { CluConfig } from "./cluConfig";
-import { TurnContext } from "botbuilder";
+import { CluConfig } from './cluConfig';
+import { TurnContext } from 'botbuilder';
 import {
     AnalyzeConversationResponse,
     ConversationalTask,
     ConversationAnalysisClient
-} from "@azure/ai-language-conversations";
-const { AzureKeyCredential } = require('@azure/core-auth');
+} from '@azure/ai-language-conversations';
+
+import { AzureKeyCredential } from '@azure/core-auth';
 
 export class CluRecognizer {
     private conversationsClient: ConversationAnalysisClient;
@@ -23,7 +24,7 @@ export class CluRecognizer {
 
     /**
      * Recognizes intents and entities in a user utterance in a turn context
-     * @param utterance
+     * @param turnContext The context object including utterance text.
      */
     async recognizeAsync(turnContext: TurnContext): Promise<AnalyzeConversationResponse> {
         const utterance = turnContext.activity.text;
@@ -48,29 +49,29 @@ export class CluRecognizer {
      */
     private async recognizeInternalAsync(utterance: string, turnContext?: TurnContext): Promise<AnalyzeConversationResponse> {
         const request: ConversationalTask =
-        {
-            analysisInput:
             {
-                conversationItem:
-                {
-                    text: utterance,
-                    id: '1',
-                    participantId: '1'
-                }
-            },
-            parameters:
-            {
-                projectName: this.options.projectName,
-                deploymentName: this.options.deploymentName
-            },
-            kind: 'Conversation'
-        };
+                analysisInput:
+                    {
+                        conversationItem:
+                            {
+                                text: utterance,
+                                id: '1',
+                                participantId: '1'
+                            }
+                    },
+                parameters:
+                    {
+                        projectName: this.options.projectName,
+                        deploymentName: this.options.deploymentName
+                    },
+                kind: 'Conversation'
+            };
 
         const cluResponse = await this.conversationsClient.analyzeConversation(request);
 
         const traceInfo = { response: cluResponse };
 
-        if(turnContext){
+        if (turnContext) {
             await turnContext.sendTraceActivity('CLU Recognizer', traceInfo, this.CluTraceLabel);
         }
 

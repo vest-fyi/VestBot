@@ -1,4 +1,4 @@
-interface PriceEarningsRatio {
+export interface PriceEarningsRatio {
   // Highlights
   pe: number,
 

@@ -1,4 +1,4 @@
-import { EHDSearchResponse, EHDSearchResult } from "../model";
+import { EHDSearchResponse } from "../model";
 
 interface EHDSearchQueryConfig {
   /**

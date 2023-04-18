@@ -24,6 +24,8 @@ import { VestUtil } from '../util/vestUtil';
 import { EHDSymbolType } from '../model/eodHistoricalData/literals';
 import { FundEarnings } from '../model/fundamental/fundEarnings';
 import { FieldNotFoundError } from '../error/FieldNotFoundError';
+import { PriceEarningsRatio } from '../model/fundamental/PriceEarningsRatio';
+import { Dividend } from '../model/fundamental/dividend';
 
 const DATE_RESOLVER_DIALOG = 'dateResolverDialog';
 const WATERFALL_DIALOG = 'waterfallDialog';

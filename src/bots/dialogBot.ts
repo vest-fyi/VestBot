@@ -6,12 +6,10 @@ import {
     BotState,
     ConversationState,
     StatePropertyAccessor,
-    TurnContext,
     UserState,
 } from 'botbuilder';
 import { Dialog, DialogState } from 'botbuilder-dialogs';
 import { MainDialog } from '../dialogs/mainDialog';
-import { AdaptiveCardInvokeResponse, AdaptiveCardInvokeValue } from "botframework-schema";
 
 export class DialogBot extends ActivityHandler {
     private conversationState: BotState;
@@ -85,19 +83,5 @@ export class DialogBot extends ActivityHandler {
         });
     }
 
-    protected onAdaptiveCardInvoke(
-      context: TurnContext,
-      invokeValue: AdaptiveCardInvokeValue
-    ): Promise<AdaptiveCardInvokeResponse> {
-        // console.debug('Current context is .', context);
-
-        return Promise.resolve({
-            "statusCode": 200,
-            "type": "<string>",
-            "value": {
-                "message": "Hello World"
-            }
-        });
-    }
 }
 

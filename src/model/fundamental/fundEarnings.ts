@@ -1,11 +1,3 @@
-import {
-  EHDBalanceSheet,
-  EHDCashFlow,
-  EHDEarningsAnnual,
-  EHDEarningsHistorical,
-  EHDIncomeStatement
-} from "../eodHistoricalData/model";
-
 export interface FundEarnings {
   // ETF_Data
   expenseRatio: number, // fraction form representing percentage

@@ -28,6 +28,8 @@ import { Stage } from '../model/stage';
 import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
 import { BETA_SERVER_SECRET_ARN, SERVER_SECRET, VEST_DEFAULT_REGION } from './constant';
 import { SecretsManagerUtil } from './secrets-manager';
+import { Dividend } from '../model/fundamental/dividend';
+import { PriceEarningsRatio } from '../model/fundamental/PriceEarningsRatio';
 
 export type GetFundamentalResponse =
     number
@@ -103,6 +105,7 @@ export class EodHistoricDataUtil {
      * get fundamental of a stock or fund
      * @param {string} symbol - The stock or fund symbol
      * @param {string} fundamentalType - The fundamental type
+     * @param stockType
      * @param {string} date - The date of the fundamental
      * @return the fundamental data
      *
@@ -116,6 +119,8 @@ export class EodHistoricDataUtil {
         symbol: string,
         fundamentalType: FundamentalType,
         stockType: EHDSymbolType,
+        // TODO: support date VES-30
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         date?: Date
     ): Promise<GetFundamentalResponse> {
         try {

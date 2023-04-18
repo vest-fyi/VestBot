@@ -70,7 +70,6 @@ export class EcsServiceStack extends Stack {
         const asset = new DockerImageAsset(this, 'ServiceImage', {
             directory: path.join(__dirname, '..', '..', '..', '..'),
             // buildArgs: {
-            //     // unfortunately can't retrieve from SecretsManager https://github.com/aws/aws-cdk/issues/14395
             //     SSH_PRIVATE_KEY: GITHUB_PRIVATE_KEY,
             // },
         });

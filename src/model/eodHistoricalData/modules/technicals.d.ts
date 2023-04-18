@@ -19,6 +19,7 @@ import {
   EHDFormatConfig,
   EHDOrderConfig
 } from './shared'
+import { AnyObject } from '../utils';
 
 type EHDTechnicalIndicatorFunction =
   | 'adx'
@@ -163,15 +164,15 @@ type EHDTechnicalsSplitAdjustedOnlyConfig<T> = T extends
   | 'slope'
   | 'macd'
   ? EHDTechnicalsSplitAdjustedOnlyConfigOption
-  : {}
+  : unknown
 
 type EHDTechnicalsStochasticConfig<T> = T extends 'stochastic'
   ? EHDStochasticTechnicalIndicatorOptions
-  : {}
+  : unknown
 
 type EHDTechnicalsMacdConfig<T> = T extends 'macd'
   ? EHDMacdTechnicalIndicatorOptions
-  : {}
+  : unknown
 
 interface EHDStochasticTechnicalIndicatorOptions {
   /**

@@ -1,4 +1,4 @@
-interface Dividend {
+export interface Dividend {
   annualDividendPerShareTTM: number;
   dividendYield: number;
   forwardAnnualDividendRate: number; // in USD amount

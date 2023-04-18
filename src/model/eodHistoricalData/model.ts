@@ -22,6 +22,7 @@ import {
   EHDSubscriptionType,
   EHDSymbolType
 } from './literals'
+import { AnyObject } from './utils';
 
 export interface EHDUser {
   name: string
@@ -851,7 +852,7 @@ export interface EHDETFData {
   Sector_Weights: {
     [key in EHDSector]: EHDETFSectorWeight
   }
-  Fixed_Income: {}
+  Fixed_Income: unknown
   Holdings_Count: number
   Top_10_Holdings: {
     [key: string]: EHDETFHolding
@@ -1004,7 +1005,7 @@ export interface EHDMutualFundData {
       [key: string]: EHDMutualFundAllocationData
     }
   }
-  Top_Countries: {}
+  Top_Countries: unknown
   market_capitalization: null
   world_regions: null
   sector_weights: null

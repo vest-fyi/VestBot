@@ -43,7 +43,7 @@ export abstract class BotResponseHelper {
         }
 
         // Create the data rows
-        data.forEach((row, rowIndex) => {
+        data.forEach((row) => {
             table += `|${row.map((cell, i) => ` ${String(cell).padEnd(columnWidths[i])} |`).join('')}\n`;
             table += separator;
         });
