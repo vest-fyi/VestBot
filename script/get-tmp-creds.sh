@@ -15,7 +15,7 @@ unset AWS_SESSION_TOKEN
 
 eval "$(aws2-wrap --profile AdministratorAccess-"$DEV_ACCOUNT" --export)"
 
-echo "Exported env vars to assume AWS profile AdministratorAccess-$DEV_ACCOUNT \nAWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}, \nAWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}, \nAWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN} "
+echo "Exported env vars to assume AWS profile AdministratorAccess-$DEV_ACCOUNT \nAWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID} \nAWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY} \nAWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN} "
 
 # TODO: get non-zero exit status. Following code does not work
 #if [ $? -ne 0 ]; then

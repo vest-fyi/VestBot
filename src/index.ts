@@ -16,7 +16,7 @@ import * as path from 'path';
 import { StockResearchRecognizer } from './clu/stockResearchRecognizer';
 import { Dialog } from './model/dialog';
 import { Stage } from './model/stage';
-
+import { logger } from './util/logger';
 
 (async () => {
     // import env file
@@ -37,7 +37,7 @@ import { Stage } from './model/stage';
         // This check writes out errors to console log .vs. app insights.
         // NOTE: In production environment, you should consider logging this to Azure
         //       application insights.
-        console.error(`\n [onTurnError] unhandled error: ${error}`);
+        logger.error(error,`\n [onTurnError] unhandled error`);
 
         // Send a trace activity, which will be displayed in Bot Framework Emulator
         await context.sendTraceActivity(
@@ -80,14 +80,20 @@ import { Stage } from './model/stage';
     // Create HTTP server
     const server = restify.createServer();
     server.use(restify.plugins.bodyParser());
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    server.use(require('restify-pino-logger')({
+        logger: logger,
+        autoLogging: false
+    }));
 
     server.listen(process.env.port || process.env.PORT || 3978, () => {
-        console.log(`\nVest bot at ${process.env.STAGE} is ${server.name} listening to ${server.url}`);
+        logger.info(`Vest bot at ${process.env.STAGE} is ${server.name} listening to ${server.url}`);
+
         if (process.env.STAGE === Stage.LOCAL) {
-            console.log(
-                '\nGet Bot Framework Emulator: https://aka.ms/botframework-emulator'
+            logger.info(
+                'Get Bot Framework Emulator: https://aka.ms/botframework-emulator'
             );
-            console.log('\nTo talk to your bot, open the emulator select "Open Bot"');
+            logger.info('To talk to your bot, open the emulator select "Open Bot"');
         }
 
     });

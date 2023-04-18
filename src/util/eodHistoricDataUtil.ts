@@ -30,6 +30,7 @@ import { BETA_SERVER_SECRET_ARN, SERVER_SECRET, VEST_DEFAULT_REGION } from './co
 import { SecretsManagerUtil } from './secrets-manager';
 import { Dividend } from '../model/fundamental/dividend';
 import { PriceEarningsRatio } from '../model/fundamental/PriceEarningsRatio';
+import { logger } from './logger';
 
 export type GetFundamentalResponse =
     number
@@ -42,9 +43,10 @@ export type GetFundamentalResponse =
 export class EodHistoricDataUtil {
     private apiToken: string;
 
-    private isInitialized(){
+    private isInitialized() {
         return this.apiToken != undefined;
     }
+
     /**
      * Constructor for EodHistoricDataUtil
      *
@@ -60,7 +62,7 @@ export class EodHistoricDataUtil {
             const secretMgr = new SecretsManagerUtil(client);
 
             const serverSecret = await secretMgr.getServerSecret(process.env.STAGE == Stage.ALPHA ? BETA_SERVER_SECRET_ARN : SERVER_SECRET);
-            console.debug('serverSecret: ' + JSON.stringify(serverSecret));
+            logger.debug(serverSecret, 'serverSecret: ');
 
             this.apiToken = serverSecret.EODHistoricalDataAPIKey;
         }
@@ -96,7 +98,11 @@ export class EodHistoricDataUtil {
 
             return response[0];
         } catch (error) {
-            console.error('Search stock failed', error);
+            logger.error(error, 'Search stock failed with error: ');
+            if (error instanceof SymbolNotFoundError) {
+                throw error;
+            }
+
             throw new EodHistoricalDataApiError(error);
         }
     }
@@ -154,7 +160,7 @@ export class EodHistoricDataUtil {
                     throw new Error('Unreachable code');
             }
         } catch (error) {
-            console.error('get fundamentals failed', error);
+            logger.error(error, 'get fundamentals failed with error: ');
             throw error;
         }
     }
@@ -264,7 +270,7 @@ export class EodHistoricDataUtil {
         const nextEarningsDateString = DatetimeUtil.dateToDateString(
             new Date(previousEarningsDate.getFullYear(), previousEarningsDate.getMonth() + 4, 1)
         );
-        console.debug('nextEarningsDate is ', nextEarningsDateString);
+        logger.debug(nextEarningsDateString, 'nextEarningsDate is ');
 
         const earningsHistoryKey = `Earnings::History::${nextEarningsDateString}`;
         const earningsTrendKey = `Earnings::Trend::${nextEarningsDateString}`;
@@ -354,7 +360,7 @@ export class EodHistoricDataUtil {
             const url = `${EOD_HISTORICAL_DATA_BASE_URL}${subPath}?${queryString}`;
 
             response = await axios.get(url);
-            console.debug('response: ', response.data);
+            logger.debug(response.data, `Received response for fetchEodHistoricalData request ${subPath}: `);
 
             if (response.status === 404) {
                 throw new SymbolNotFoundError(`No stock found for ${subPath}`);
@@ -369,9 +375,8 @@ export class EodHistoricDataUtil {
                 throw error;
             }
 
-            console.error(
-                `Error fetching data for ${subPath}, ${queryParams ? JSON.stringify(queryParams) : 'no queryParams'}:`,
-                error.message
+            logger.error(error.message,
+                `Error fetching data for ${subPath}, ${queryParams ? JSON.stringify(queryParams) : 'no queryParams'}:`
             );
             throw new EodHistoricalDataApiError(error);
         }
@@ -430,7 +435,7 @@ export class EodHistoricDataUtil {
 
             return new Date(response.earnings[0].date);
         } catch (error) {
-            console.error('get previous earnings date failed', error);
+            logger.error(error, 'get previous earnings date failed with error: ');
             throw error;
         }
     }

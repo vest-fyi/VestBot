@@ -10,6 +10,7 @@ import {
 } from 'botbuilder';
 import { Dialog, DialogState } from 'botbuilder-dialogs';
 import { MainDialog } from '../dialogs/mainDialog';
+import { logger } from '../util/logger';
 
 export class DialogBot extends ActivityHandler {
     private conversationState: BotState;
@@ -43,7 +44,7 @@ export class DialogBot extends ActivityHandler {
         // this.onTurn(async (context, next) => {
         //     // call onAdaptiveCardInvoke if the activity is an invoke activity
         //     if (context.activity.type === 'invoke') {
-        //         console.debug('Current context for invoke activity is ', context);
+        //         logger.debug(context, 'Current context for invoke activity is ');
         //         await this.onAdaptiveCardInvoke(
         //             context,
         //             context.activity as unknown as AdaptiveCardInvokeValue
@@ -54,7 +55,7 @@ export class DialogBot extends ActivityHandler {
         // });
         //
         // this.onEvent(async (context, next) => {
-        //     console.debug('Current context is .', context);
+        //     logger.debug(context, 'Current context is ');
         //
         //     // By calling next() you ensure that the next BotHandler is run.
         //     await next();
@@ -62,9 +63,9 @@ export class DialogBot extends ActivityHandler {
         // });
 
         this.onMessage(async (context, next) => {
-            console.log('Running dialog with Message Activity.');
+            logger.info('Running dialog with Message Activity.');
 
-            // console.debug('Current context is .', context);
+            // logger.debug(context, 'Current context is ');
 
             // Run the Dialog with the new message Activity.
             await (this.dialog as MainDialog).run(context, this.dialogState);

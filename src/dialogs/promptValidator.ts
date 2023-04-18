@@ -8,6 +8,7 @@ import { SymbolNotFoundError } from "../error/SymbolNotFoundError";
 import { EodHistoricDataUtil } from "../util/eodHistoricDataUtil";
 import { EHDSearchResult } from "../model/eodHistoricalData/model";
 import { EHDSymbolType } from '../model/eodHistoricalData/literals';
+import { logger } from '../util/logger';
 
 export enum PromptName {
     TEXT_PROMPT = 'textPrompt',
@@ -51,10 +52,11 @@ async function stockValidator(
 
             return true;
         } catch (error) {
-            console.error(error);
+            logger.error(error, 'Caught error in stockValidator');
+
             if (error instanceof EodHistoricalDataApiError) {
                 await promptContext.context.sendActivity(
-                    'Sorry our service is not available at the moment. Please try again later.'
+                    'Sorry our service is not available at the moment. Please try again.'
                 );
             }
             if (error instanceof SymbolNotFoundError) {
@@ -85,7 +87,7 @@ async function fundamentalTypeValidator(
 ): Promise<boolean> {
     if (promptContext.recognized.succeeded) {
         const cluResult: AnalyzeConversationResponse =
-            await new StockResearchRecognizer().executeCluQueryOnUtterance(
+            await (await new StockResearchRecognizer().init()).executeCluQueryOnUtterance(
                 promptContext.recognized.value
             );
 

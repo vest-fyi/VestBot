@@ -16,6 +16,7 @@ import { Stage } from '../model/stage';
 import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
 import { BETA_SERVER_SECRET_ARN, SERVER_SECRET, VEST_DEFAULT_REGION } from '../util/constant';
 import { SecretsManagerUtil } from '../util/secrets-manager';
+import { logger } from '../util/logger';
 
 export class StockResearchRecognizer {
     private recognizer: CluRecognizer;
@@ -39,16 +40,16 @@ export class StockResearchRecognizer {
             const secretMgr = new SecretsManagerUtil(client);
 
             const serverSecret = await secretMgr.getServerSecret(process.env.STAGE == Stage.ALPHA ? BETA_SERVER_SECRET_ARN : SERVER_SECRET);
-            console.debug('serverSecret: ' + JSON.stringify(serverSecret));
+            logger.debug(serverSecret, 'serverSecret is');
             cluAPIKey = serverSecret.CluAPIKey;
             cluAPIHostName = serverSecret.CluAPIHostName;
             cluProjectName = serverSecret.CluProjectName;
             cluDeploymentName = serverSecret.CluDeploymentName;
 
-            console.debug('cluAPIKey: ' + cluAPIKey);
-            console.debug('cluAPIHostName: ' + cluAPIHostName);
-            console.debug('cluProjectName: ' + cluProjectName);
-            console.debug('cluDeploymentName: ' + cluDeploymentName);
+            logger.debug(cluAPIKey, 'cluAPIKey: ');
+            logger.debug(cluAPIHostName, 'cluAPIHostName: ');
+            logger.debug(cluProjectName, 'cluProjectName: ');
+            logger.debug(cluDeploymentName, 'cluDeploymentName: ');
         }
 
         const cluConfig = new CluConfig({
@@ -94,9 +95,11 @@ export class StockResearchRecognizer {
     ): GetFundamentalDialogParameters {
         const getFundamentalRequest = new GetFundamentalDialogParameters();
 
+        logger.debug(response.result.prediction.topIntent, 'extracting entities in intent: ');
+
         const entities = (response.result.prediction as ConversationPrediction).entities;
         entities.forEach((entity) => {
-            console.debug('extracted entity ' + JSON.stringify(entity));
+            logger.debug(entity, 'extracted entity is: ');
 
             switch (VestUtil.removeCapitalization(entity.category)) {
                 case Entity.STOCK:

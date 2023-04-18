@@ -19,6 +19,7 @@ import { GetFundamentalDialog } from './getFundamentalDialog';
 import { StockResearchRecognizer } from '../clu/stockResearchRecognizer';
 import { Dialog } from '../model/dialog';
 import { Intent } from '../model/intent';
+import { logger } from '../util/logger';
 
 const MAIN_WATERFALL_DIALOG = 'mainWaterfallDialog';
 
@@ -31,14 +32,14 @@ export class MainDialog extends ComponentDialog {
     ) {
         if (!stockResearchRecognizer) {
             throw new Error(
-                "[MainDialog]: Missing parameter 'stockResearchRecognizer' is required"
+                '[MainDialog]: Missing parameter \'stockResearchRecognizer\' is required'
             );
         }
         this.stockResearchRecognizer = stockResearchRecognizer;
 
         if (!getFundamentalDialog)
             throw new Error(
-                "[MainDialog]: Missing parameter 'getFundamentalDialog' is required"
+                '[MainDialog]: Missing parameter \'getFundamentalDialog\' is required'
             );
     }
 
@@ -96,6 +97,7 @@ export class MainDialog extends ComponentDialog {
     private async introStep(
         stepContext: WaterfallStepContext
     ): Promise<DialogTurnResult> {
+        // TODO: handle adaptive card input VES-28
         // const activity = stepContext.activity;
         // if (activity.type === 'message' && activity.text) {
         //     // Handle the user input from the Adaptive Card
@@ -108,7 +110,6 @@ export class MainDialog extends ComponentDialog {
         //     });
         // }
         // await next();
-
 
         // prompt
         const messageText = (stepContext.options as any).restartMsg
@@ -138,7 +139,7 @@ export class MainDialog extends ComponentDialog {
 
         // DEBUG
         const topIntent = this.stockResearchRecognizer.topIntent(cluResult);
-        console.debug('Detected topIntent ', topIntent);
+        logger.debug(topIntent, 'Detected topIntent ');
 
         switch (topIntent) {
             case Intent.GET_FUNDAMENTAL:
@@ -148,10 +149,7 @@ export class MainDialog extends ComponentDialog {
                         cluResult
                     );
 
-                console.debug(
-                    'CLU extracted these get fundamental parameters from intent statement:',
-                    JSON.stringify(getFundamentalParameters)
-                );
+                logger.debug(getFundamentalParameters, 'CLU extracted these get fundamental parameters from intent statement:');
 
                 // Run the GetFundamental dialog passing in whatever details we have from the CLU call, it will fill out the remainder.
                 return await stepContext.beginDialog(

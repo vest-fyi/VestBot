@@ -7,6 +7,7 @@ import {
 import { ResourceNotFoundError } from '../error/ResourceNotFoundError';
 import { InternalError } from '../error/InternalError';
 import { ServerSecret } from '../model/secret';
+import { logger } from './logger';
 
 export class SecretsManagerUtil {
     public constructor(private readonly client: SecretsManagerClient) {
@@ -37,9 +38,8 @@ export class SecretsManagerUtil {
                 throw error;
             }
 
-            console.error(
-                `Error occurred in getServerSecret() for ${secretName}`,
-                error
+            logger.error(error,
+                `Error occurred in getServerSecret() for ${secretName}`
             );
 
             throw new InternalError(
@@ -65,12 +65,10 @@ export class SecretsManagerUtil {
 
             return res.SecretString as string;
         } catch (error) {
+            logger.error(error, 'Caught error in getSecretString()');
             if (error instanceof ResourceNotFoundException) {
                 throw new ResourceNotFoundError(`${secretKey} not found`);
             }
-
-            // Jest seem to swallow stack trace
-            console.error(error);
 
             throw new InternalError(`Error occurred in getSecretString(${secretKey})`);
         }

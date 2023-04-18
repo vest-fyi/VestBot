@@ -2,9 +2,7 @@ export enum Dialog {
   MAIN = 'main',
   GET_FUNDAMENTAL = 'getFundamental',
 
-  // TODO: remove
-  BOOKING = 'booking',
-
+  // TODO: add cancel and help dialogs VES-42
   CONFIRMATION = 'confirmation',
   CANCEL = 'cancel',
   HELP = 'help',

@@ -26,6 +26,7 @@ import { FundEarnings } from '../model/fundamental/fundEarnings';
 import { FieldNotFoundError } from '../error/FieldNotFoundError';
 import { PriceEarningsRatio } from '../model/fundamental/PriceEarningsRatio';
 import { Dividend } from '../model/fundamental/dividend';
+import { logger } from '../util/logger';
 
 const DATE_RESOLVER_DIALOG = 'dateResolverDialog';
 const WATERFALL_DIALOG = 'waterfallDialog';
@@ -77,7 +78,8 @@ export class GetFundamentalDialog extends CancelAndHelpDialog {
                     } as StockPromptValidatedResponse)}`
                 );
             } catch (error) {
-                console.error(error);
+                logger.error(error, 'Caught error in stock step of get fundamental dialog');
+
                 if (error instanceof EodHistoricalDataApiError) {
                     await stepContext.context.sendActivity(
                         'Sorry our service is not available at the moment. Please try again later.'
@@ -89,7 +91,6 @@ export class GetFundamentalDialog extends CancelAndHelpDialog {
                         `Sorry we cannot find the stock by the name of ${stepContext.options.symbol}. Please try again.`
                     );
                 }
-                console.error(error);
             }
         }
 
