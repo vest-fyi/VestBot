@@ -18,7 +18,7 @@ import { FundamentalType } from '../model/fundamental/fundamentalType';
 import { CalendarEarningsResponse } from '../model/eodHistoricalData/modules/calendar';
 import { NoEarningsError } from '../error/NoEarningsError';
 import { StockEarnings } from '../model/fundamental/stockEarnings';
-import { AnalystRating } from '../model/fundamental/analystRating';
+import { StockAnalystRating } from '../model/fundamental/stockAnalystRating';
 import { NoAnalystRatingError } from '../error/NoAnalystRatingError';
 import { DatetimeUtil } from './datetime';
 import { EHDSymbolType } from '../model/eodHistoricalData/literals';
@@ -28,17 +28,23 @@ import { Stage } from '../model/stage';
 import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
 import { BETA_SERVER_SECRET_ARN, SERVER_SECRET, VEST_DEFAULT_REGION } from './constant';
 import { SecretsManagerUtil } from './secrets-manager';
-import { Dividend } from '../model/fundamental/dividend';
-import { PriceEarningsRatio } from '../model/fundamental/PriceEarningsRatio';
+import { StockDividend } from '../model/fundamental/stockDividend';
+import { StockPriceEarningsRatio } from '../model/fundamental/stockPriceEarningsRatio';
 import { logger } from './logger';
+import { FundAnalystRating } from '../model/fundamental/fundAnalystRating';
+import { FundPriceEarningsRatio } from '../model/fundamental/fundPriceEarningsRatio';
+import { FundDividend } from '../model/fundamental/fundDividend';
 
 export type GetFundamentalResponse =
     number
     | StockEarnings
     | FundEarnings
-    | AnalystRating
-    | Dividend
-    | PriceEarningsRatio;
+    | StockAnalystRating
+    | FundAnalystRating
+    | StockDividend
+    | FundDividend
+    | StockPriceEarningsRatio
+    | FundPriceEarningsRatio;
 
 export class EodHistoricDataUtil {
     private apiToken: string;
@@ -133,39 +139,60 @@ export class EodHistoricDataUtil {
             if (!this.isInitialized()) {
                 await this.init();
             }
+            switch (stockType) {
+                case EHDSymbolType.COMMON_STOCK:
+                    switch (fundamentalType) {
+                        case FundamentalType.MARKET_CAPITALIZATION:
+                            return await this.getMarketCap(symbol);
 
-            switch (fundamentalType) {
-                case FundamentalType.MARKET_CAPITALIZATION:
-                    if (stockType !== EHDSymbolType.COMMON_STOCK) {
-                        throw new SymbolIsFundError(`Symbol ${symbol} is a fund`);
+                        case FundamentalType.EARNINGS:
+                            return await this.getStockEarnings(symbol);
+
+                        case FundamentalType.ANALYST_RATING:
+                            return await this.getStockAnalystRating(symbol);
+
+                        case FundamentalType.DIVIDEND:
+                            return await this.getStockDividend(symbol);
+
+                        case FundamentalType.PRICE_EARNINGS_RATIO:
+                            return await this.getPriceEarningsRatio(symbol);
+
+                        default:
+                            throw new Error('Unreachable code');
                     }
-                    return await this.getMarketCapForGetFundamental(symbol);
+                case EHDSymbolType.ETF:
+                case EHDSymbolType.FUND:
+                case EHDSymbolType.INDEX:
+                    switch (fundamentalType) {
+                        case FundamentalType.MARKET_CAPITALIZATION:
+                            throw new SymbolIsFundError(EodHistoricDataUtil.getUnsupportedGetFundamentalMessage(symbol, stockType, FundamentalType.MARKET_CAPITALIZATION));
 
-                case FundamentalType.EARNINGS:
-                    if (stockType !== EHDSymbolType.COMMON_STOCK) {
-                        return await this.getFundEarningsForGetFundamental(symbol);
+                        case FundamentalType.EARNINGS:
+                            return await this.getFundEarnings(symbol);
+
+                        case FundamentalType.ANALYST_RATING:
+                            return await this.getFundAnalystRating(symbol);
+
+                        case FundamentalType.DIVIDEND:
+                            return await this.getFundDividend(symbol);
+
+                        case FundamentalType.PRICE_EARNINGS_RATIO:
+                            return await this.getPriceEarningsRatio(symbol);
+
+                        default:
+                            throw new Error('Unreachable code');
                     }
-                    return await this.getStockEarningsForGetFundamental(symbol);
-
-                case FundamentalType.ANALYST_RATING:
-                    return await this.getAnalystRatingForGetFundamental(symbol);
-
-                case FundamentalType.DIVIDEND:
-                    return await this.getDividendForGetFundamental(symbol);
-
-                case FundamentalType.PRICE_EARNINGS_RATIO:
-                    return await this.getPriceEarningsRatioForGetFundamental(symbol);
-
+                    return await this.getFundEarnings(symbol);
                 default:
-                    throw new Error('Unreachable code');
             }
+
         } catch (error) {
             logger.error(error, 'get fundamentals failed with error: ');
             throw error;
         }
     }
 
-    private async getMarketCapForGetFundamental(symbol: string): Promise<number> {
+    private async getMarketCap(symbol: string): Promise<number> {
         if (!this.isInitialized()) {
             await this.init();
         }
@@ -187,7 +214,7 @@ export class EodHistoricDataUtil {
      * @param symbol
      * @private
      */
-    private async getStockEarningsForGetFundamental(symbol: string): Promise<StockEarnings> {
+    private async getStockEarnings(symbol: string): Promise<StockEarnings> {
         // also validates symbol has earnings
         const previousEarningsDateString = DatetimeUtil.dateToDateString(await this.getPreviousEarningsDate(symbol));
         const quarterDateString = DatetimeUtil.getLastQuarterDateString();
@@ -237,6 +264,10 @@ export class EodHistoricDataUtil {
         } as StockEarnings;
     }
 
+    public static getUnsupportedGetFundamentalMessage(symbol: string, symbolType: EHDSymbolType, fundamentalType: FundamentalType): string {
+        return `${symbol} is a ${symbolType}. Sorry, I don't support ${fundamentalType} for ${symbolType} yet.`;
+    }
+
     /**
      * handles user query on FundamentalType.EARNINGS
      *
@@ -245,7 +276,7 @@ export class EodHistoricDataUtil {
      * @param symbol
      * @private
      */
-    private async getFundEarningsForGetFundamental(symbol: string): Promise<FundEarnings> {
+    private async getFundEarnings(symbol: string): Promise<FundEarnings> {
         const response = await this.fetchEodHistoricalData(`${EOD_HISTORICAL_DATA_ENDPOINT.FUNDAMENTALS}/${symbol}`, {
             filter: 'ETF_Data',
         }) as EHDETFData;
@@ -265,7 +296,23 @@ export class EodHistoricDataUtil {
         } as FundEarnings;
     }
 
-    private async getAnalystRatingForGetFundamental(symbol: string): Promise<AnalystRating> {
+    private async getFundAnalystRating(symbol: string): Promise<FundAnalystRating> {
+        const forwardPEKey = 'ETF_Data::Valuations_Growth::Valuations_Rates_To_Category::Price/Prospective Earnings';
+        const longTermProjectedEarningsGrowthKey = 'ETF_Data::Valuations_Growth::Growth_Rates_Portfolio::Long-Term Projected Earnings Growth';
+        const morningStarRatioKey = 'ETF_Data::MorningStar::Ratio';
+        const response = await this.fetchEodHistoricalData(`${EOD_HISTORICAL_DATA_ENDPOINT.FUNDAMENTALS}/${symbol}`, {
+            filter: `${forwardPEKey},${longTermProjectedEarningsGrowthKey},${morningStarRatioKey}`,
+        });
+
+        return {
+            forwardPE: Number(response[forwardPEKey]),
+            longTermProjectedEarningsGrowth: Number(response[longTermProjectedEarningsGrowthKey]),
+            morningStarRatio: Number(response[morningStarRatioKey]),
+        };
+    }
+
+
+    private async getStockAnalystRating(symbol: string): Promise<StockAnalystRating> {
         const previousEarningsDate = await this.getPreviousEarningsDate(symbol);
         const nextEarningsDateString = DatetimeUtil.dateToDateString(
             new Date(previousEarningsDate.getFullYear(), previousEarningsDate.getMonth() + 4, 1)
@@ -294,10 +341,10 @@ export class EodHistoricDataUtil {
             // estimate for upcoming quarter
             nextQuarterEstimates: response[earningsTrendKey],
             nextQuarterDateAndEps: response[earningsHistoryKey],
-        } as AnalystRating;
+        } as StockAnalystRating;
     }
 
-    private async getDividendForGetFundamental(symbol: string): Promise<Dividend> {
+    private async getStockDividend(symbol: string): Promise<StockDividend> {
         const response = await this.fetchEodHistoricalData(`${EOD_HISTORICAL_DATA_ENDPOINT.FUNDAMENTALS}/${symbol}`, {
             filter: 'SplitsDividends,Highlights::DividendShare,Highlights::DividendYield',
         });
@@ -317,35 +364,57 @@ export class EodHistoricDataUtil {
             dividendDate: response.SplitsDividends.DividendDate,
             exDividendDate: response.SplitsDividends.ExDividendDate,
             payoutRatio: Number(response.SplitsDividends.PayoutRatio),
-        } as Dividend;
+        } as StockDividend;
     }
 
-    private async getPriceEarningsRatioForGetFundamental(symbol: string): Promise<PriceEarningsRatio> {
+    private async getFundDividend(symbol: string): Promise<FundDividend> {
+        const dividendYieldParentKey = 'ETF_Data::Valuations_Growth::Valuations_Rates_Portfolio';
+        const dividendPayingFrequencyKey = 'ETF_Data::Dividend_Paying_Frequency';
         const response = await this.fetchEodHistoricalData(`${EOD_HISTORICAL_DATA_ENDPOINT.FUNDAMENTALS}/${symbol}`, {
-            filter: 'Highlights,Valuation,General::Type',
+            filter: `${dividendYieldParentKey},${dividendPayingFrequencyKey}`,
         });
 
-        if (response['General::Type'] !== EHDSymbolType.COMMON_STOCK) {
-            throw new SymbolIsFundError(
-                `Symbol ${symbol} is a ${response['General::Type']} and does not have PE ratio`
-            );
-        }
-
-        const highlights: EHDStockHighlights = response.Highlights as EHDStockHighlights;
-
         return {
-            // Highlights
-            // WARNING: for BRK.A/B, PE ratio is null
-            pe: highlights.PERatio ?? 'not available',
+            dividendYield: Number(response[dividendYieldParentKey]['Dividend-Yield Factor']),
+            dividendPayingFrequency: response[dividendPayingFrequencyKey],
+        };
+    }
 
-            // Valuation
-            // WARNING: for BRK.A/B, trailing PE ratio is 0
-            trailingPE:
-                (response.Valuation as EHDStockValuation).TrailingPE === 0
-                    ? 'not available'
-                    : (response.Valuation as EHDStockValuation).TrailingPE,
-            forwardPE: (response.Valuation as EHDStockValuation).ForwardPE,
-        } as PriceEarningsRatio;
+    // for both stock and fund
+    private async getPriceEarningsRatio(symbol: string): Promise<StockPriceEarningsRatio | FundPriceEarningsRatio> {
+        const etfForwardPEKey = 'ETF_Data::Valuations_Growth::Valuations_Rates_To_Category::Price/Prospective Earnings';
+        const response = await this.fetchEodHistoricalData(`${EOD_HISTORICAL_DATA_ENDPOINT.FUNDAMENTALS}/${symbol}`, {
+            filter: `Highlights,Valuation,General::Type,${etfForwardPEKey}`,
+        });
+
+        const stockType = response['General::Type'];
+        switch (stockType) {
+            case EHDSymbolType.COMMON_STOCK:
+                const highlights: EHDStockHighlights = response.Highlights as EHDStockHighlights;
+
+                return {
+                    // Highlights
+                    // WARNING: for BRK.A/B, PE ratio is null
+                    pe: highlights.PERatio ?? 'not available',
+
+                    // Valuation
+                    // WARNING: for BRK.A/B, trailing PE ratio is 0
+                    trailingPE:
+                        (response.Valuation as EHDStockValuation).TrailingPE === 0
+                            ? 'not available'
+                            : (response.Valuation as EHDStockValuation).TrailingPE,
+                    forwardPE: (response.Valuation as EHDStockValuation).ForwardPE,
+                } as StockPriceEarningsRatio;
+
+            case EHDSymbolType.ETF:
+            case EHDSymbolType.FUND:
+            case EHDSymbolType.INDEX:
+                return {
+                    forwardPE: response[etfForwardPEKey],
+                } as FundPriceEarningsRatio;
+            default:
+                throw new SymbolIsFundError(EodHistoricDataUtil.getUnsupportedGetFundamentalMessage(symbol, stockType, FundamentalType.PRICE_EARNINGS_RATIO));
+        }
     }
 
     private async fetchEodHistoricalData(subPath: string, queryParams?: Record<string, any>): Promise<any> {

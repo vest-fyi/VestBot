@@ -1248,7 +1248,11 @@ export type EHDOptionType = 'CALL' | 'PUT'
 
 export type EHDPaymentMethod = 'PayPal' | 'Stripe'
 
-export type EHDPeriod = 'Annual' | 'Quarterly'
+export enum EHDPeriod {
+    ANNUAL = 'Annual',
+    QUARTERLY = 'Quarterly',
+    NA = 'NA',
+}
 
 export enum EHDSector {
     BASIC_MATERIALS = 'Basic Materials',
@@ -1276,7 +1280,7 @@ export enum EHDSymbolType {
     COMMON_STOCK = 'Common Stock',
     CURRENCY = 'Currency',
     ETF = 'ETF',
-    FUND = 'FUND',
+    FUND = 'FUND',  // mutual fund
     BOND = 'BOND',
     MONEY = 'MONEY',
     INDEX = 'INDEX'

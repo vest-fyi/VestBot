@@ -1,122 +1,619 @@
 {
   "General": {
-    "Code": "BRK",
-    "Type": "Common Stock",
-    "Name": "BRK.B",
-    "Exchange": "B",
+    "Code": "ARKK",
+    "Type": "ETF",
+    "Name": "ARK Innovation ETF",
+    "Exchange": "NYSE ARCA",
     "CurrencyCode": "USD",
     "CurrencyName": "US Dollar",
     "CurrencySymbol": "$",
     "CountryName": "USA",
     "CountryISO": "US",
-    "ISIN": null,
-    "LEI": null,
-    "PrimaryTicker": null,
-    "CIK": null,
-    "EmployerIdNumber": null,
-    "FiscalYearEnd": null,
-    "IPODate": null,
-    "InternationalDomestic": null,
-    "Sector": null,
-    "Industry": null,
-    "GicSector": null,
-    "GicGroup": null,
-    "GicIndustry": null,
-    "GicSubIndustry": null,
-    "Description": null,
-    "Address": null,
-    "AddressData": null,
-    "Listings": {},
-    "Officers": {},
-    "Phone": null,
-    "WebURL": null,
-    "LogoURL": "",
-    "FullTimeEmployees": null
-  },
-  "Highlights": {
-    "EPSEstimateCurrentYear": 0,
-    "EPSEstimateNextYear": 0,
-    "EPSEstimateCurrentQuarter": 0,
-    "EPSEstimateNextQuarter": null,
-    "MostRecentQuarter": null,
-    "ProfitMargin": 0,
-    "OperatingMarginTTM": 0,
-    "ReturnOnAssetsTTM": 0,
-    "ReturnOnEquityTTM": 0,
-    "RevenueTTM": 0,
-    "RevenuePerShareTTM": 0,
-    "QuarterlyRevenueGrowthYOY": 0,
-    "GrossProfitTTM": 0,
-    "DilutedEpsTTM": 0,
-    "QuarterlyEarningsGrowthYOY": 0
-  },
-  "Valuation": {
-    "TrailingPE": 0,
-    "ForwardPE": 0,
-    "PriceSalesTTM": 0,
-    "PriceBookMRQ": 0,
-    "EnterpriseValue": 0,
-    "EnterpriseValueRevenue": 0,
-    "EnterpriseValueEbitda": 0
-  },
-  "SharesStats": {
-    "SharesOutstanding": 0,
-    "SharesFloat": 0,
-    "PercentInsiders": 0,
-    "PercentInstitutions": 0,
-    "SharesShort": null,
-    "SharesShortPriorMonth": null,
-    "ShortRatio": null,
-    "ShortPercentOutstanding": null,
-    "ShortPercentFloat": null
+    "Description": "The fund is an actively-managed exchange-traded fund (ETF) that will invest under normal circumstances primarily (at least 65% of its assets) in domestic and foreign equity securities of companies that are relevant to the fund's investment theme of disruptive innovation. Its investments in foreign equity securities will be in both developed and emerging markets. The fund may invest in foreign securities listed on foreign exchanges as well as American Depositary Receipts (\"ADRs\") and Global Depositary Receipts (\"GDRs\"). The fund is non-diversified.",
+    "Category": "Mid-Cap Growth",
+    "UpdatedAt": "2023-04-18"
   },
   "Technicals": {
-    "Beta": null,
-    "52WeekHigh": 0,
-    "52WeekLow": 0,
-    "50DayMA": 0,
-    "200DayMA": 0,
-    "SharesShort": 0,
-    "SharesShortPriorMonth": 0,
-    "ShortRatio": 0,
-    "ShortPercent": 0
+    "Beta": 1.76,
+    "52WeekHigh": 59.43,
+    "52WeekLow": 29.43,
+    "50DayMA": 39.308,
+    "200DayMA": 39.5215
   },
-  "SplitsDividends": {
-    "ForwardAnnualDividendRate": 0,
-    "ForwardAnnualDividendYield": 0,
-    "PayoutRatio": 0,
-    "DividendDate": null,
-    "ExDividendDate": null,
-    "LastSplitFactor": null,
-    "LastSplitDate": null,
-    "NumberDividendsByYear": {}
-  },
-  "Holders": null,
-  "InsiderTransactions": {},
-  "outstandingShares": {
-    "annual": {},
-    "quarterly": {}
-  },
-  "Earnings": {
-    "History": {},
-    "Trend": {},
-    "Annual": {}
-  },
-  "Financials": {
-    "Balance_Sheet": {
-      "currency_symbol": null,
-      "quarterly": {},
-      "yearly": {}
+  "ETF_Data": {
+    "ISIN": "US00214Q1040",
+    "Company_Name": "ARK",
+    "Company_URL": "http://www.ark-funds.com",
+    "ETF_URL": "",
+    "Domicile": "United States",
+    "Index_Name": null,
+    "Yield": "0.000000",
+    "Dividend_Paying_Frequency": "NA",
+    "Inception_Date": "2014-10-31",
+    "Max_Annual_Mgmt_Charge": "0.00",
+    "Ongoing_Charge": "0.0000",
+    "Date_Ongoing_Charge": "0000-00-00",
+    "NetExpenseRatio": "0.00750",
+    "AnnualHoldingsTurnover": "0.00000",
+    "TotalAssets": "7561720306.00",
+    "Average_Mkt_Cap_Mil": "14707.51835",
+    "Market_Capitalisation": {
+      "Mega": "15.51778",
+      "Big": "5.87802",
+      "Medium": "55.16675",
+      "Small": "19.47576",
+      "Micro": "3.83258"
     },
-    "Cash_Flow": {
-      "currency_symbol": null,
-      "quarterly": {},
-      "yearly": {}
+    "Asset_Allocation": {
+      "Cash": {
+        "Long_%": "0",
+        "Short_%": "0",
+        "Net_Assets_%": "0"
+      },
+      "NotClassified": {
+        "Long_%": "0",
+        "Short_%": "0",
+        "Net_Assets_%": "0"
+      },
+      "Stock non-US": {
+        "Long_%": "9.85197",
+        "Short_%": "0",
+        "Net_Assets_%": "9.85197"
+      },
+      "Other": {
+        "Long_%": "0",
+        "Short_%": "0",
+        "Net_Assets_%": "0"
+      },
+      "Stock US": {
+        "Long_%": "90.01892",
+        "Short_%": "0",
+        "Net_Assets_%": "90.01892"
+      },
+      "Bond": {
+        "Long_%": "0.12911",
+        "Short_%": "0",
+        "Net_Assets_%": "0.12911"
+      }
     },
-    "Income_Statement": {
-      "currency_symbol": null,
-      "quarterly": {},
-      "yearly": {}
+    "World_Regions": {
+      "North America": {
+        "Equity_%": "95.976",
+        "Relative_to_Category": "97.192"
+      },
+      "United Kingdom": {
+        "Equity_%": "0",
+        "Relative_to_Category": "0.42196"
+      },
+      "Europe Developed": {
+        "Equity_%": "4.024",
+        "Relative_to_Category": "1.101"
+      },
+      "Europe Emerging": {
+        "Equity_%": "0",
+        "Relative_to_Category": "0"
+      },
+      "Africa/Middle East": {
+        "Equity_%": "0",
+        "Relative_to_Category": "0.282"
+      },
+      "Japan": {
+        "Equity_%": "0",
+        "Relative_to_Category": "0.05"
+      },
+      "Australasia": {
+        "Equity_%": "0",
+        "Relative_to_Category": "0"
+      },
+      "Asia Developed": {
+        "Equity_%": "0",
+        "Relative_to_Category": "0.225"
+      },
+      "Asia Emerging": {
+        "Equity_%": "0",
+        "Relative_to_Category": "0.566"
+      },
+      "Latin America": {
+        "Equity_%": "0",
+        "Relative_to_Category": "0.127"
+      }
+    },
+    "Sector_Weights": {
+      "Basic Materials": {
+        "Equity_%": "0",
+        "Relative_to_Category": "2.46159"
+      },
+      "Consumer Cyclicals": {
+        "Equity_%": "13.65339",
+        "Relative_to_Category": "13.98554"
+      },
+      "Financial Services": {
+        "Equity_%": "7.03763",
+        "Relative_to_Category": "9.80168"
+      },
+      "Real Estate": {
+        "Equity_%": "0",
+        "Relative_to_Category": "3.15513"
+      },
+      "Communication Services": {
+        "Equity_%": "14.64062",
+        "Relative_to_Category": "3.08998"
+      },
+      "Energy": {
+        "Equity_%": "0",
+        "Relative_to_Category": "3.24"
+      },
+      "Industrials": {
+        "Equity_%": "0",
+        "Relative_to_Category": "14.94629"
+      },
+      "Technology": {
+        "Equity_%": "34.68184",
+        "Relative_to_Category": "26.52562"
+      },
+      "Consumer Defensive": {
+        "Equity_%": "0.43521",
+        "Relative_to_Category": "2.58145"
+      },
+      "Healthcare": {
+        "Equity_%": "29.55131",
+        "Relative_to_Category": "19.51561"
+      },
+      "Utilities": {
+        "Equity_%": "0",
+        "Relative_to_Category": "0.69711"
+      }
+    },
+    "Fixed_Income": {
+      "EffectiveDuration": {
+        "Fund_%": "0",
+        "Relative_to_Category": "0"
+      },
+      "ModifiedDuration": {
+        "Fund_%": "0",
+        "Relative_to_Category": "0"
+      },
+      "EffectiveMaturity": {
+        "Fund_%": "0",
+        "Relative_to_Category": "0"
+      },
+      "CreditQuality": {
+        "Fund_%": "0",
+        "Relative_to_Category": "0"
+      },
+      "Coupon": {
+        "Fund_%": "0",
+        "Relative_to_Category": "3.96044"
+      },
+      "Price": {
+        "Fund_%": "0",
+        "Relative_to_Category": "0"
+      },
+      "YieldToMaturity": {
+        "Fund_%": "0",
+        "Relative_to_Category": "0"
+      }
+    },
+    "Holdings_Count": 27,
+    "Top_10_Holdings": {
+      "TSLA.US": {
+        "Code": "TSLA",
+        "Exchange": "US",
+        "Name": "Tesla Inc",
+        "Sector": "Consumer Cyclical",
+        "Industry": "Auto Manufacturers",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 9.62331
+      },
+      "ZM.US": {
+        "Code": "ZM",
+        "Exchange": "US",
+        "Name": "Zoom Video Communications Inc",
+        "Sector": "Technology",
+        "Industry": "Software-Application",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 7.89976
+      },
+      "ROKU.US": {
+        "Code": "ROKU",
+        "Exchange": "US",
+        "Name": "Roku Inc",
+        "Sector": "Communication Services",
+        "Industry": "Entertainment",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 7.57886
+      },
+      "COIN.US": {
+        "Code": "COIN",
+        "Exchange": "US",
+        "Name": "Coinbase Global Inc",
+        "Sector": "Financial Services",
+        "Industry": "Financial Data & Stock Exchanges",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 7.28939
+      },
+      "EXAS.US": {
+        "Code": "EXAS",
+        "Exchange": "US",
+        "Name": "EXACT Sciences Corporation",
+        "Sector": "Healthcare",
+        "Industry": "Diagnostics & Research",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 6.08277
+      },
+      "SQ.US": {
+        "Code": "SQ",
+        "Exchange": "US",
+        "Name": "Block Inc",
+        "Sector": "Technology",
+        "Industry": "Software-Infrastructure",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 5.89141
+      },
+      "PATH.US": {
+        "Code": "PATH",
+        "Exchange": "US",
+        "Name": "Uipath Inc",
+        "Sector": "Technology",
+        "Industry": "Software-Infrastructure",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 5.75469
+      },
+      "SHOP.US": {
+        "Code": "SHOP",
+        "Exchange": "US",
+        "Name": "Shopify Inc",
+        "Sector": "Technology",
+        "Industry": "Software-Application",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 5.60281
+      },
+      "TDOC.US": {
+        "Code": "TDOC",
+        "Exchange": "US",
+        "Name": "Teladoc Inc",
+        "Sector": "Healthcare",
+        "Industry": "Health Information Services",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 4.14767
+      },
+      "RBLX.US": {
+        "Code": "RBLX",
+        "Exchange": "US",
+        "Name": "Roblox Corp",
+        "Sector": "Communication Services",
+        "Industry": "Electronic Gaming & Multimedia",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 3.92316
+      }
+    },
+    "Holdings": {
+      "TSLA.US": {
+        "Code": "TSLA",
+        "Exchange": "US",
+        "Name": "Tesla Inc",
+        "Sector": "Consumer Cyclical",
+        "Industry": "Auto Manufacturers",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 9.62331
+      },
+      "ZM.US": {
+        "Code": "ZM",
+        "Exchange": "US",
+        "Name": "Zoom Video Communications Inc",
+        "Sector": "Technology",
+        "Industry": "Software-Application",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 7.89976
+      },
+      "ROKU.US": {
+        "Code": "ROKU",
+        "Exchange": "US",
+        "Name": "Roku Inc",
+        "Sector": "Communication Services",
+        "Industry": "Entertainment",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 7.57886
+      },
+      "COIN.US": {
+        "Code": "COIN",
+        "Exchange": "US",
+        "Name": "Coinbase Global Inc",
+        "Sector": "Financial Services",
+        "Industry": "Financial Data & Stock Exchanges",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 7.28939
+      },
+      "EXAS.US": {
+        "Code": "EXAS",
+        "Exchange": "US",
+        "Name": "EXACT Sciences Corporation",
+        "Sector": "Healthcare",
+        "Industry": "Diagnostics & Research",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 6.08277
+      },
+      "SQ.US": {
+        "Code": "SQ",
+        "Exchange": "US",
+        "Name": "Block Inc",
+        "Sector": "Technology",
+        "Industry": "Software-Infrastructure",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 5.89141
+      },
+      "PATH.US": {
+        "Code": "PATH",
+        "Exchange": "US",
+        "Name": "Uipath Inc",
+        "Sector": "Technology",
+        "Industry": "Software-Infrastructure",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 5.75469
+      },
+      "SHOP.US": {
+        "Code": "SHOP",
+        "Exchange": "US",
+        "Name": "Shopify Inc",
+        "Sector": "Technology",
+        "Industry": "Software-Application",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 5.60281
+      },
+      "TDOC.US": {
+        "Code": "TDOC",
+        "Exchange": "US",
+        "Name": "Teladoc Inc",
+        "Sector": "Healthcare",
+        "Industry": "Health Information Services",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 4.14767
+      },
+      "RBLX.US": {
+        "Code": "RBLX",
+        "Exchange": "US",
+        "Name": "Roblox Corp",
+        "Sector": "Communication Services",
+        "Industry": "Electronic Gaming & Multimedia",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 3.92316
+      },
+      "DKNG.US": {
+        "Code": "DKNG",
+        "Exchange": "US",
+        "Name": "DraftKings Inc",
+        "Sector": "Consumer Cyclical",
+        "Industry": "Gambling",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 3.90215
+      },
+      "CRSP.US": {
+        "Code": "CRSP",
+        "Exchange": "US",
+        "Name": "Crispr Therapeutics AG",
+        "Sector": "Healthcare",
+        "Industry": "Biotechnology",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 3.74147
+      },
+      "U.US": {
+        "Code": "U",
+        "Exchange": "US",
+        "Name": "Unity Software Inc",
+        "Sector": "Technology",
+        "Industry": "Software-Application",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 3.52801
+      },
+      "NTLA.US": {
+        "Code": "NTLA",
+        "Exchange": "US",
+        "Name": "Intellia Therapeutics Inc",
+        "Sector": "Healthcare",
+        "Industry": "Biotechnology",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 3.49078
+      },
+      "PD_old.US": {
+        "Code": "PD_old",
+        "Exchange": "US",
+        "Name": "PD",
+        "Sector": "Technology",
+        "Industry": "Software-Application",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 3.29983
+      },
+      "TWLO.US": {
+        "Code": "TWLO",
+        "Exchange": "US",
+        "Name": "Twilio Inc",
+        "Sector": "Communication Services",
+        "Industry": "Internet Content & Information",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 3.28726
+      },
+      "HOOD.US": {
+        "Code": "HOOD",
+        "Exchange": "US",
+        "Name": "Robinhood Markets Inc",
+        "Sector": "Technology",
+        "Industry": "Software-Infrastructure",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 2.63809
+      },
+      "BEAM.US": {
+        "Code": "BEAM",
+        "Exchange": "US",
+        "Name": "Beam Therapeutics Inc",
+        "Sector": "Healthcare",
+        "Industry": "Biotechnology",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 2.55344
+      },
+      "PACB.US": {
+        "Code": "PACB",
+        "Exchange": "US",
+        "Name": "Pacific Biosciences of California",
+        "Sector": "Healthcare",
+        "Industry": "Medical Devices",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 2.15302
+      },
+      "TXG.US": {
+        "Code": "TXG",
+        "Exchange": "US",
+        "Name": "10X Genomics Inc",
+        "Sector": "Healthcare",
+        "Industry": "Health Information Services",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 1.94838
+      },
+      "DNA.US": {
+        "Code": "DNA",
+        "Exchange": "US",
+        "Name": "Ginkgo Bioworks Holdings",
+        "Sector": "Healthcare",
+        "Industry": "Biotechnology",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 1.83826
+      },
+      "VCYT.US": {
+        "Code": "VCYT",
+        "Exchange": "US",
+        "Name": "Veracyte Inc",
+        "Sector": "Healthcare",
+        "Industry": "Biotechnology",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 1.39357
+      },
+      "TWST.US": {
+        "Code": "TWST",
+        "Exchange": "US",
+        "Name": "Twist Bioscience Corp",
+        "Sector": "Healthcare",
+        "Industry": "Diagnostics & Research",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 0.69368
+      },
+      "CERS.US": {
+        "Code": "CERS",
+        "Exchange": "US",
+        "Name": "Cerus Corporation",
+        "Sector": "Healthcare",
+        "Industry": "Medical Devices",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 0.52645
+      },
+      "TWOU.US": {
+        "Code": "TWOU",
+        "Exchange": "US",
+        "Name": "2U Inc",
+        "Sector": "Consumer Defensive",
+        "Industry": "Education & Training Services",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 0.43077
+      },
+      "VERV.US": {
+        "Code": "VERV",
+        "Exchange": "US",
+        "Name": "Verve Therapeutics Inc",
+        "Sector": "Healthcare",
+        "Industry": "Biotechnology",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 0.35351
+      },
+      "NVTA.US": {
+        "Code": "NVTA",
+        "Exchange": "US",
+        "Name": "Invitae Corp",
+        "Sector": "Healthcare",
+        "Industry": "Diagnostics & Research",
+        "Country": "United States",
+        "Region": "North America",
+        "Assets_%": 0.33219
+      }
+    },
+    "Valuations_Growth": {
+      "Valuations_Rates_Portfolio": {
+        "Price/Prospective Earnings": "44.95671",
+        "Price/Book": "2.55389",
+        "Price/Sales": "3.65905",
+        "Price/Cash Flow": "20.70887",
+        "Dividend-Yield Factor": "0"
+      },
+      "Valuations_Rates_To_Category": {
+        "Price/Prospective Earnings": "23.41623",
+        "Price/Book": "3.47053",
+        "Price/Sales": "2.64755",
+        "Price/Cash Flow": "13.04981",
+        "Dividend-Yield Factor": "0.98817"
+      },
+      "Growth_Rates_Portfolio": {
+        "Long-Term Projected Earnings Growth": "13.92533",
+        "Historical Earnings Growth": "607.0175",
+        "Sales Growth": "23.82432",
+        "Cash-Flow Growth": "-3.28605",
+        "Book-Value Growth": "17.6661"
+      },
+      "Growth_Rates_To_Category": {
+        "Long-Term Projected Earnings Growth": "14.82483",
+        "Historical Earnings Growth": "20.00719",
+        "Sales Growth": "13.70735",
+        "Cash-Flow Growth": "8.92154",
+        "Book-Value Growth": "6.87498"
+      }
+    },
+    "MorningStar": {
+      "Ratio": "1",
+      "Category_Benchmark": "MSCI ACWI NR USD",
+      "Sustainability_Ratio": "1"
+    },
+    "Performance": {
+      "1y_Volatility": "49.32",
+      "3y_Volatility": "45.77",
+      "3y_ExpReturn": "0.00",
+      "3y_SharpRatio": "0.15",
+      "Returns_YTD": "24.49",
+      "Returns_1Y": "-32.19",
+      "Returns_3Y": "-8.63",
+      "Returns_5Y": "-0.10",
+      "Returns_10Y": "0.00"
     }
   }
 }

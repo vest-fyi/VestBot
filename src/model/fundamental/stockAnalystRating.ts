@@ -4,7 +4,7 @@ import {
   EHDEarningsTrend,
 } from "../eodHistoricalData/model";
 
-export interface AnalystRating {
+export interface StockAnalystRating {
   // Valuation
   forwardPE: number;
 
