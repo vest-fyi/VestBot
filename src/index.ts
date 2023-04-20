@@ -1,7 +1,9 @@
 import * as restify from 'restify';
 
 import {
-    CloudAdapter, ConfigurationServiceClientCredentialFactory,
+    CloudAdapter,
+    ConfigurationBotFrameworkAuthentication,
+    ConfigurationBotFrameworkAuthenticationOptions, ConfigurationServiceClientCredentialFactory,
     ConversationState, createBotFrameworkAuthenticationFromConfiguration,
     MemoryStorage,
     UserState,
@@ -17,6 +19,20 @@ import { StockResearchRecognizer } from './clu/stockResearchRecognizer';
 import { Dialog } from './model/dialog';
 import { Stage } from './model/stage';
 import { logger } from './util/logger';
+import { SecretsManagerUtil } from './util/secrets-manager';
+import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
+import { SERVER_SECRET, VEST_DEFAULT_REGION } from './util/constant';
+import { ServerSecret } from './model/secret';
+
+
+async function getServerSecret(): Promise<ServerSecret> {
+    const secretMgr = new SecretsManagerUtil(new SecretsManagerClient({ region: VEST_DEFAULT_REGION }));
+    const serverSecret = await secretMgr.getServerSecret(SERVER_SECRET);
+    // DEBUG
+    console.debug('server secret: ', serverSecret);
+    return serverSecret;
+    // return await secretMgr.getServerSecret(SERVER_SECRET);
+}
 
 (async () => {
     // import env file
@@ -24,9 +40,10 @@ import { logger } from './util/logger';
     config({ path: ENV_FILE });
     const healthCheckPath = process.env.HEALTH_CHECK_PATH;
 
-    const credentialsFactory = new ConfigurationServiceClientCredentialFactory();
-    const botFrameworkAuthentication =
-        createBotFrameworkAuthenticationFromConfiguration(null, credentialsFactory);
+    // for local and alpha, bot is not registered to Azure Bot Service as it requires HTTPS, and thus not capable of Direct Line (Web Chat) for frontend
+    const botFrameworkAuthentication = process.env.STAGE === Stage.LOCAL || process.env.STAGE === Stage.ALPHA ?
+        createBotFrameworkAuthenticationFromConfiguration(null, new ConfigurationServiceClientCredentialFactory())
+        : new ConfigurationBotFrameworkAuthentication(await getServerSecret() as ConfigurationBotFrameworkAuthenticationOptions);
 
     // create an adapter to handle connectivity with the channels
     // See https://aka.ms/about-bot-adapter to learn more about adapters.
@@ -37,7 +54,7 @@ import { logger } from './util/logger';
         // This check writes out errors to console log .vs. app insights.
         // NOTE: In production environment, you should consider logging this to Azure
         //       application insights.
-        logger.error(error,`\n [onTurnError] unhandled error`);
+        logger.error(error, `\n [onTurnError] unhandled error`);
 
         // Send a trace activity, which will be displayed in Bot Framework Emulator
         await context.sendTraceActivity(

@@ -4,4 +4,7 @@ export interface ServerSecret {
     CluProjectName: string;
     CluDeploymentName: string;
     EODHistoricalDataAPIKey: string;
+    MicrosoftAppType: string;
+    MicrosoftAppId: string;
+    MicrosoftAppTenantId: string;
 }

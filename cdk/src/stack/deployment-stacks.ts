@@ -3,7 +3,7 @@ import { Construct } from 'constructs';
 import { StackCreationInfo, STAGE } from 'vest-common-cdk';
 import { DnsStack } from './stage-stack/dns';
 import { EcsServiceStack } from './stage-stack/ecs-service';
-import { SecretStack } from './stage-stack/param-secret';
+import { SecretStack } from './stage-stack/secret';
 import { S3Stack } from './stage-stack/s3';
 import { VpcStack } from './stage-stack/vpc';
 

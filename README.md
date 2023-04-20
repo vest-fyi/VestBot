@@ -11,7 +11,15 @@ This bot has been created using [Bot Framework](https://dev.botframework.com), i
 
 ## Prerequisites
 
-This sample **requires** prerequisites in order to run.
+
+## Testing
+### Testing in local
+copy sample.env to .env and fill in the values
+
+### Testing in alpha
+Alpha is a staging environment for testing. It retrieves server secrets from Secrets Manager in beta AWS account.
+Because it is served on HTTP via load balancer listener endpoint, it is not registered to Azure Bot Service and cannot be tested via frontend. It can however be tested in Bot Framework Emulator.
+See [Connecting to a deployed bot](#connecting-to-a-deployed-bot)
 
 ### Overview
 
