@@ -23,6 +23,7 @@ import { SecretsManagerUtil } from './util/secrets-manager';
 import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
 import { SERVER_SECRET, VEST_DEFAULT_REGION } from './util/constant';
 import { ServerSecret } from './model/secret';
+import { ConfigurationServiceClientCredentialFactoryOptions } from 'botbuilder-core/src/configurationServiceClientCredentialFactory';
 
 
 async function getServerSecret(): Promise<ServerSecret> {
@@ -41,9 +42,18 @@ async function getServerSecret(): Promise<ServerSecret> {
     const healthCheckPath = process.env.HEALTH_CHECK_PATH;
 
     // for local and alpha, bot is not registered to Azure Bot Service as it requires HTTPS, and thus not capable of Direct Line (Web Chat) for frontend
-    const botFrameworkAuthentication = process.env.STAGE === Stage.LOCAL || process.env.STAGE === Stage.ALPHA ?
-        createBotFrameworkAuthenticationFromConfiguration(null, new ConfigurationServiceClientCredentialFactory())
-        : new ConfigurationBotFrameworkAuthentication(await getServerSecret() as ConfigurationBotFrameworkAuthenticationOptions);
+    let botFrameworkAuthentication;
+    if(process.env.STAGE === Stage.LOCAL || process.env.STAGE === Stage.ALPHA){
+        botFrameworkAuthentication = createBotFrameworkAuthenticationFromConfiguration(null, new ConfigurationServiceClientCredentialFactory())
+    } else {
+        const serverSecret = await getServerSecret();
+        botFrameworkAuthentication = createBotFrameworkAuthenticationFromConfiguration(null, new ConfigurationServiceClientCredentialFactory({
+                MicrosoftAppId: serverSecret.MicrosoftAppId,
+                MicrosoftAppPassword: serverSecret.MicrosoftAppPassword,
+                MicrosoftAppType: serverSecret.MicrosoftAppType,
+                MicrosoftAppTenantId: serverSecret.MicrosoftAppTenantId
+            } as ConfigurationServiceClientCredentialFactoryOptions));
+    }
 
     // create an adapter to handle connectivity with the channels
     // See https://aka.ms/about-bot-adapter to learn more about adapters.

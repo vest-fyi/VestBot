@@ -7,4 +7,5 @@ export interface ServerSecret {
     MicrosoftAppType: string;
     MicrosoftAppId: string;
     MicrosoftAppTenantId: string;
+    MicrosoftAppPassword: string;
 }
