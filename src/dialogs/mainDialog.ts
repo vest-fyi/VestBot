@@ -18,7 +18,7 @@ import {
 import { GetFundamentalDialog } from './getFundamentalDialog';
 import { StockResearchRecognizer } from '../clu/stockResearchRecognizer';
 import { Dialog } from '../model/dialog';
-import { Intent } from '../model/intent';
+import { Intent, IntentUtterance } from '../model/intent';
 import { logger } from '../util/logger';
 
 const MAIN_WATERFALL_DIALOG = 'mainWaterfallDialog';
@@ -83,10 +83,24 @@ export class MainDialog extends ComponentDialog {
         dialogSet.add(this);
 
         const dialogContext = await dialogSet.createContext(context);
-        const results = await dialogContext.continueDialog();
-        if (results.status === DialogTurnStatus.empty) {
+
+        // logger.debug(context, 'Current context is ');
+
+        if (this.isWelcomeCardButtonAction(context)) {
             await dialogContext.beginDialog(this.id);
+        } else {
+            const results = await dialogContext.continueDialog();
+            if (results.status === DialogTurnStatus.empty) {
+                await dialogContext.beginDialog(this.id);
+            }
         }
+
+
+    }
+
+    private isWelcomeCardButtonAction(context: TurnContext): boolean {
+        // TODO: expand other card actions
+        return context.activity.type === 'message' && context.activity.text === IntentUtterance[Intent.GET_FUNDAMENTAL];
     }
 
     /**
@@ -97,24 +111,14 @@ export class MainDialog extends ComponentDialog {
     private async introStep(
         stepContext: WaterfallStepContext
     ): Promise<DialogTurnResult> {
-        // TODO: handle adaptive card input VES-28
-        // const activity = stepContext.activity;
-        // if (activity.type === 'message' && activity.text) {
-        //     // Handle the user input from the Adaptive Card
-        //     await stepContext.sendActivity({
-        //         text: activity.text,
-        //         type: 'message',
-        //         channelId: activity.channelId,
-        //         from: activity.from,
-        //         conversation: activity.conversation
-        //     });
-        // }
-        // await next();
+        if (this.isWelcomeCardButtonAction(stepContext.context)) {
+            return await stepContext.next(stepContext.context.activity.text);
+        }
 
         // prompt
         const messageText = (stepContext.options as any).restartMsg
             ? (stepContext.options as any).restartMsg
-            : 'What can I help you with today?\nSay something like "Book a flight from Paris to Berlin on March 22, 2020"';
+            : 'What can I help you with today?';
         const promptMessage = MessageFactory.text(
             messageText,
             messageText,
@@ -132,6 +136,12 @@ export class MainDialog extends ComponentDialog {
     private async actStep(
         stepContext: WaterfallStepContext
     ): Promise<DialogTurnResult> {
+        if (this.isWelcomeCardButtonAction(stepContext.context)) {
+            return await stepContext.beginDialog(
+                Dialog.GET_FUNDAMENTAL,
+            );
+        }
+
         // Call CLU and gather any potential booking details. (Note the TurnContext has the response to the prompt)
         const cluResult = await this.stockResearchRecognizer.executeCluQuery(
             stepContext.context

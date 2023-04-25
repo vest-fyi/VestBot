@@ -21,18 +21,16 @@
       "type": "TextBlock",
       "size": "default",
       "isSubtle": true,
-      "text": "Ask me anything about the stock market and I'll do my best to answer your questions. I can also provide you with a list of stocks that meet your criteria. Here are some samples to get started!",
+      "text": "Ask me anything about the stock market and I'll do my best to answer your questions. Here are some ideas to try out!",
       "wrap": true,
       "maxLines": 0
     }
   ],
   "actions": [
     {
-      "type": "Action.Execute",
+      "type": "Action.Submit",
       "title": "Get fundamental",
-      "data": {
-        "inputValue": "Get fundamental"
-      }
+      "data": "get fundamental"
     },
     {
       "type": "Action.OpenUrl",

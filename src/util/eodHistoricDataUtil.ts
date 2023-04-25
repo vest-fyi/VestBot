@@ -349,12 +349,12 @@ export class EodHistoricDataUtil {
             filter: 'SplitsDividends,Highlights::DividendShare,Highlights::DividendYield',
         });
 
-        if (response['Highlights::DividendShare'] === 'NA') {
-            throw new NoDividendError(`Symbol ${symbol} is a fund and does not have market capitalization`);
+        if (response['Highlights::DividendYield'] === 'NA') {
+            throw new NoDividendError(`Symbol ${symbol} is a fund and does not have dividends`);
         }
 
         return {
-            annualDividendPerShareTTM: response['Highlights::DividendShare'],
+            annualDividendPerShareTTM: response['Highlights::DividendShare'] === "NA" ? 0 : response['Highlights::DividendShare'],
             dividendYield: response['Highlights::DividendYield'],
             forwardAnnualDividendRate: Number(response.SplitsDividends.ForwardAnnualDividendRate),
             forwardAnnualDividendYield: Number(response.SplitsDividends.ForwardAnnualDividendYield),

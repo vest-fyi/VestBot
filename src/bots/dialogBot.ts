@@ -15,7 +15,7 @@ import { logger } from '../util/logger';
 export class DialogBot extends ActivityHandler {
     private conversationState: BotState;
     private userState: BotState;
-    private dialog: Dialog;
+    private dialog: MainDialog;
     private dialogState: StatePropertyAccessor<DialogState>;
 
     /**
@@ -24,8 +24,9 @@ export class DialogBot extends ActivityHandler {
      * @param {BotState} userState
      * @param {Dialog} dialog
      */
-    constructor(conversationState: BotState, userState: BotState, dialog: Dialog) {
+    constructor(conversationState: BotState, userState: BotState, dialog: MainDialog) {
         super();
+
         if (!conversationState) {
             throw new Error('[DialogBot]: Missing parameter. conversationState is required');
         }
@@ -63,9 +64,7 @@ export class DialogBot extends ActivityHandler {
         // });
 
         this.onMessage(async (context, next) => {
-            logger.info('Running dialog with Message Activity.');
-
-            // logger.debug(context, 'Current context is ');
+            logger.info('Processing Message Activity');
 
             // Run the Dialog with the new message Activity.
             await (this.dialog as MainDialog).run(context, this.dialogState);

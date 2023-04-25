@@ -2,17 +2,18 @@
 // Licensed under the MIT License.
 
 import { BotState, CardFactory } from 'botbuilder';
-import { Dialog, DialogState } from 'botbuilder-dialogs';
+import { DialogState } from 'botbuilder-dialogs';
 import { MainDialog } from '../dialogs/mainDialog';
 import { DialogBot } from './dialogBot';
 
 import * as WelcomeCard from '../resources/welcomeCard.json';
+import { logger } from '../util/logger';
 
 export class DialogAndWelcomeBot extends DialogBot {
     constructor(
         conversationState: BotState,
         userState: BotState,
-        dialog: Dialog
+        dialog: MainDialog
     ) {
         super(conversationState, userState, dialog);
 

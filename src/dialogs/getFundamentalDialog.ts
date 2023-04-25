@@ -340,21 +340,20 @@ export class GetFundamentalDialog extends CancelAndHelpDialog {
                     resp.annualDividendPerShareTTM
                 } per share of dividends in the last 12 months. 
     The dividend yield, which is the dividends per share divided by the price per share, is ${
-                    resp.dividendYield * 100
+                    (resp.dividendYield * 100).toFixed(3)
                 }%.
     \nFor ${new Date().getFullYear().toString()}, it is projected the annual dividend payout of ${symbol} is $${
                     resp.forwardAnnualDividendRate
-                } per share, and the dividend yield is ${resp.forwardAnnualDividendYield * 100}%.
+                } per share, and the dividend yield is ${(resp.forwardAnnualDividendYield * 100).toFixed(3)}%.
     ${symbol} pays its shareholders dividends ${
-                    // round to 3 decimal places
                     resp.numberOfDividendsPerYear.toFixed(3)
                 } times a year. The last time ${symbol} paid dividends was on ${
                     resp.dividendDate
                 }. If you bought ${symbol} prior to ${resp.dividendDate}, you are eligible to receive $${
                     resp.annualDividendPerShareTTM
                 } for each share you own.
-    \nCurrently, ${symbol} has a payout ratio of ${resp.payoutRatio * 100}%. In other words, ${symbol} uses ${
-                    resp.payoutRatio * 100
+    \nCurrently, ${symbol} has a payout ratio of ${(resp.payoutRatio * 100).toFixed(3)}%. In other words, ${symbol} uses ${
+                    (resp.payoutRatio * 100).toFixed(3)
                 }% of its net income to pay dividends. \nThe payout ratio is a measure of how much of a company's earnings are paid out as dividends. A high payout ratio is generally not sustainable, and indicates that the company may not be able to sustain its dividend payments. A low payout ratio is generally a good thing, and indicates that the company has plenty of earnings to reinvest in the business.`;
                 break;
 
