@@ -152,23 +152,15 @@ export class MainDialog extends ComponentDialog {
             // use GPT-4 response as fallback
             await turnContext.sendActivity({ type: ActivityTypes.Typing })
 
-            // const openAi = await OpenAi.create();
-            // const response = await openAi.getAnswer(turnContext.activity.text);
-            // logger.debug(response, 'GPT-4 response is ');
-            //
-            // await turnContext.sendActivity(
-            //     response,
-            //     InputHints.IgnoringInput
-            // );
-
-            // DEBUG
-            // sleep for 5 seconds
-            await new Promise(resolve => setTimeout(resolve, 5000));
+            const openAi = await OpenAi.create();
+            const response = await openAi.getAnswer(turnContext.activity.text);
+            logger.debug(response, 'GPT-4 response is ');
 
             await turnContext.sendActivity(
-                'debug response',
+                response,
                 InputHints.IgnoringInput
             );
+            
             return await stepContext.next();
         }
 
