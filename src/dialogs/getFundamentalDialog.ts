@@ -252,13 +252,15 @@ export class GetFundamentalDialog extends CancelAndHelpDialog {
             \nETFs that has high LTPEG may be expected to deliver stronger earnings growth in the future, which could lead to higher returns over the long term.           
             \nIt has a MorningStar ratio of ${resp.morningStarRatio}. A ratio above 1.00 indicates that the stock’s price is higher than Morningstar’s estimate of its fair value.
             \nHowever, it's important to note that forward P/E, LTPEG, and MorningStar Ratio are only estimates, and there are many factors that can impact a company's or index's earnings growth over time, including economic conditions, industry trends, and competition. Investors should also consider other financial metrics and analysis when evaluating an ETF, such as historical performance, expense ratios, and risk factors.
+            \nYou should make your own independent evaluation of the merits and risks associated with investing in any ETF before making any investment decisions.
             `;
                 await stepContext.context.sendActivity(messageText);
                 break;
             case EHDSymbolType.COMMON_STOCK:
                 resp = getFundamentalResponse as StockAnalystRating;
 
-                messageText = `Of ${getAnalystCount(resp.analystRating)} analysts,
+                messageText = `Please note that the information presented below are not stock recommendation. You should make your own independent evaluation of the merits and risks associated with investing in any stock before making any investment decisions.
+                \nOf ${getAnalystCount(resp.analystRating)} analysts,
                 ${resp.analystRating.StrongBuy} gave a strong buy rating, 
                 ${resp.analystRating.Buy} gave a buy rating, ${resp.analystRating.Hold} gave a hold rating, ${
                     resp.analystRating.Sell
