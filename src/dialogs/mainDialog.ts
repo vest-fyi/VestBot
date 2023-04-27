@@ -1,4 +1,5 @@
 import {
+    ActivityTypes,
     InputHints,
     MessageFactory,
     StatePropertyAccessor,
@@ -20,6 +21,7 @@ import { StockResearchRecognizer } from '../clu/stockResearchRecognizer';
 import { Dialog } from '../model/dialog';
 import { Intent, IntentUtterance } from '../model/intent';
 import { logger } from '../util/logger';
+import { OpenAi } from '../util/openAi';
 
 const MAIN_WATERFALL_DIALOG = 'mainWaterfallDialog';
 
@@ -73,18 +75,16 @@ export class MainDialog extends ComponentDialog {
      * If no dialog is active, it will start the default dialog.
      *
      * @param {TurnContext} context
-     * @param accessor
+     * @param dialogStateAccessor
      */
     async run(
         context: TurnContext,
-        accessor: StatePropertyAccessor<DialogState>
+        dialogStateAccessor: StatePropertyAccessor<DialogState>
     ) {
-        const dialogSet = new DialogSet(accessor);
+        const dialogSet = new DialogSet(dialogStateAccessor);
         dialogSet.add(this);
 
         const dialogContext = await dialogSet.createContext(context);
-
-        // logger.debug(context, 'Current context is ');
 
         if (this.isWelcomeCardButtonAction(context)) {
             await dialogContext.beginDialog(this.id);
@@ -94,8 +94,6 @@ export class MainDialog extends ComponentDialog {
                 await dialogContext.beginDialog(this.id);
             }
         }
-
-
     }
 
     private isWelcomeCardButtonAction(context: TurnContext): boolean {
@@ -136,21 +134,45 @@ export class MainDialog extends ComponentDialog {
     private async actStep(
         stepContext: WaterfallStepContext
     ): Promise<DialogTurnResult> {
-        if (this.isWelcomeCardButtonAction(stepContext.context)) {
+        const turnContext = stepContext.context;
+        if (this.isWelcomeCardButtonAction(turnContext)) {
             return await stepContext.beginDialog(
                 Dialog.GET_FUNDAMENTAL,
             );
         }
 
         // Call CLU and gather any potential booking details. (Note the TurnContext has the response to the prompt)
-        const cluResult = await this.stockResearchRecognizer.executeCluQuery(
-            stepContext.context
-        );
+        const cluResult = await this.stockResearchRecognizer.executeCluQuery(turnContext);
 
         // DEBUG
-        const topIntent = this.stockResearchRecognizer.topIntent(cluResult);
-        logger.debug(topIntent, 'Detected topIntent ');
+        logger.debug(cluResult, 'CLU result is ');
 
+        const confidenceScore = this.stockResearchRecognizer.getTopIntentConfidence(cluResult);
+        if (confidenceScore < 0.9) {
+            // use GPT-4 response as fallback
+            await turnContext.sendActivity({ type: ActivityTypes.Typing })
+
+            // const openAi = await OpenAi.create();
+            // const response = await openAi.getAnswer(turnContext.activity.text);
+            // logger.debug(response, 'GPT-4 response is ');
+            //
+            // await turnContext.sendActivity(
+            //     response,
+            //     InputHints.IgnoringInput
+            // );
+
+            // DEBUG
+            // sleep for 5 seconds
+            await new Promise(resolve => setTimeout(resolve, 5000));
+
+            await turnContext.sendActivity(
+                'debug response',
+                InputHints.IgnoringInput
+            );
+            return await stepContext.next();
+        }
+
+        const topIntent = this.stockResearchRecognizer.getTopIntent(cluResult);
         switch (topIntent) {
             case Intent.GET_FUNDAMENTAL:
                 // Initialize getFundamentalParameters with any entities we may have found in the response.
@@ -169,11 +191,10 @@ export class MainDialog extends ComponentDialog {
 
             default:
                 // Catch all for unhandled intents
-                const didntUnderstandMessageText = `Sorry, I didn't get that. Please try asking in a different way (intent was ${this.stockResearchRecognizer.topIntent(
+                const didntUnderstandMessageText = `Sorry, I didn't get that. Please try asking in a different way (intent was ${this.stockResearchRecognizer.getTopIntent(
                     cluResult
                 )})`;
-                await stepContext.context.sendActivity(
-                    didntUnderstandMessageText,
+                await turnContext.sendActivity(
                     didntUnderstandMessageText,
                     InputHints.IgnoringInput
                 );

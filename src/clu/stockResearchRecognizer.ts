@@ -139,7 +139,7 @@ export class StockResearchRecognizer {
      *
      * @param response  CLU response
      */
-    public topIntent(response: AnalyzeConversationResponse): Intent {
+    public getTopIntent(response: AnalyzeConversationResponse): Intent {
         const topIntent = response.result.prediction.topIntent;
 
         const intent = VestUtil.enumFromStringValue(Intent, topIntent);
@@ -149,6 +149,15 @@ export class StockResearchRecognizer {
         } else {
             throw new InvalidIntentError(`Invalid top intent: ${topIntent}`);
         }
+    }
+
+    /**
+     * Returns the top intent confidence from the CLU response
+     *
+     * @param response  CLU response
+     */
+    public getTopIntentConfidence(response: AnalyzeConversationResponse): number {
+        return response.result.prediction.intents[0].confidence;
     }
 
     private static getTimexFromDatetimeEntity(

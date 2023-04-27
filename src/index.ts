@@ -2,14 +2,12 @@ import * as restify from 'restify';
 
 import {
     CloudAdapter,
-    ConfigurationBotFrameworkAuthentication,
-    ConfigurationBotFrameworkAuthenticationOptions, ConfigurationServiceClientCredentialFactory,
+    ConfigurationServiceClientCredentialFactory,
     ConversationState, createBotFrameworkAuthenticationFromConfiguration,
-    MemoryStorage,
+    MemoryStorage, ShowTypingMiddleware,
     UserState,
 } from 'botbuilder';
 
-import { DialogAndWelcomeBot } from './bots/dialogAndWelcomeBot';
 import { MainDialog } from './dialogs/mainDialog';
 import { GetFundamentalDialog } from './dialogs/getFundamentalDialog';
 
@@ -24,6 +22,7 @@ import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
 import { SERVER_SECRET, VEST_DEFAULT_REGION } from './util/constant';
 import { ServerSecret } from './model/secret';
 import { ConfigurationServiceClientCredentialFactoryOptions } from 'botbuilder-core/src/configurationServiceClientCredentialFactory';
+import { DialogBot } from './bots/dialogBot';
 
 
 async function getServerSecret(): Promise<ServerSecret> {
@@ -43,21 +42,22 @@ async function getServerSecret(): Promise<ServerSecret> {
 
     // for local and alpha, bot is not registered to Azure Bot Service as it requires HTTPS, and thus not capable of Direct Line (Web Chat) for frontend
     let botFrameworkAuthentication;
-    if(process.env.STAGE === Stage.LOCAL || process.env.STAGE === Stage.ALPHA){
-        botFrameworkAuthentication = createBotFrameworkAuthenticationFromConfiguration(null, new ConfigurationServiceClientCredentialFactory())
+    if (process.env.STAGE === Stage.LOCAL || process.env.STAGE === Stage.ALPHA) {
+        botFrameworkAuthentication = createBotFrameworkAuthenticationFromConfiguration(null, new ConfigurationServiceClientCredentialFactory());
     } else {
         const serverSecret = await getServerSecret();
         botFrameworkAuthentication = createBotFrameworkAuthenticationFromConfiguration(null, new ConfigurationServiceClientCredentialFactory({
-                MicrosoftAppId: serverSecret.MicrosoftAppId,
-                MicrosoftAppPassword: serverSecret.MicrosoftAppPassword,
-                MicrosoftAppType: serverSecret.MicrosoftAppType,
-                MicrosoftAppTenantId: serverSecret.MicrosoftAppTenantId
-            } as ConfigurationServiceClientCredentialFactoryOptions));
+            MicrosoftAppId: serverSecret.MicrosoftAppId,
+            MicrosoftAppPassword: serverSecret.MicrosoftAppPassword,
+            MicrosoftAppType: serverSecret.MicrosoftAppType,
+            MicrosoftAppTenantId: serverSecret.MicrosoftAppTenantId
+        } as ConfigurationServiceClientCredentialFactoryOptions));
     }
 
     // create an adapter to handle connectivity with the channels
     // See https://aka.ms/about-bot-adapter to learn more about adapters.
     const adapter = new CloudAdapter(botFrameworkAuthentication);
+    adapter.use(new ShowTypingMiddleware());
 
     // Catch-all for errors.
     const onTurnErrorHandler = async (context, error) => {
@@ -102,7 +102,7 @@ async function getServerSecret(): Promise<ServerSecret> {
         await new StockResearchRecognizer().init(),
         new GetFundamentalDialog(Dialog.GET_FUNDAMENTAL)
     );
-    const bot = new DialogAndWelcomeBot(conversationState, userState, dialog);
+    const bot = new DialogBot(conversationState, userState, dialog);
 
     // Create HTTP server
     const server = restify.createServer();

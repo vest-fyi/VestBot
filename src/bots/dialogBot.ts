@@ -3,7 +3,7 @@
 
 import {
     ActivityHandler,
-    BotState,
+    BotState, CardFactory,
     ConversationState,
     StatePropertyAccessor,
     UserState,
@@ -11,12 +11,13 @@ import {
 import { Dialog, DialogState } from 'botbuilder-dialogs';
 import { MainDialog } from '../dialogs/mainDialog';
 import { logger } from '../util/logger';
+import * as WelcomeCard from '../resources/welcomeCard.json';
 
 export class DialogBot extends ActivityHandler {
     private conversationState: BotState;
     private userState: BotState;
     private dialog: MainDialog;
-    private dialogState: StatePropertyAccessor<DialogState>;
+    private readonly dialogState: StatePropertyAccessor<DialogState>;
 
     /**
      *
@@ -42,32 +43,11 @@ export class DialogBot extends ActivityHandler {
         this.dialog = dialog;
         this.dialogState = this.conversationState.createProperty<DialogState>('DialogState');
 
-        // this.onTurn(async (context, next) => {
-        //     // call onAdaptiveCardInvoke if the activity is an invoke activity
-        //     if (context.activity.type === 'invoke') {
-        //         logger.debug(context, 'Current context for invoke activity is ');
-        //         await this.onAdaptiveCardInvoke(
-        //             context,
-        //             context.activity as unknown as AdaptiveCardInvokeValue
-        //         );
-        //     }
-        //
-        //     await next();
-        // });
-        //
-        // this.onEvent(async (context, next) => {
-        //     logger.debug(context, 'Current context is ');
-        //
-        //     // By calling next() you ensure that the next BotHandler is run.
-        //     await next();
-        //
-        // });
-
         this.onMessage(async (context, next) => {
             logger.info('Processing Message Activity');
 
             // Run the Dialog with the new message Activity.
-            await (this.dialog as MainDialog).run(context, this.dialogState);
+            await this.dialog.run(context, this.dialogState);
 
             // By calling next() you ensure that the next BotHandler is run.
             await next();
@@ -78,6 +58,25 @@ export class DialogBot extends ActivityHandler {
             await this.conversationState.saveChanges(context, false);
             await this.userState.saveChanges(context, false);
 
+            // By calling next() you ensure that the next BotHandler is run.
+            await next();
+        });
+
+        this.onMembersAdded(async (context, next) => {
+            const membersAdded = context.activity.membersAdded;
+            for (const member of membersAdded) {
+                if (member.id !== context.activity.recipient.id) {
+                    const welcomeCard = CardFactory.adaptiveCard(WelcomeCard);
+                    await context.sendActivity({ attachments: [welcomeCard] });
+
+                    await dialog.run(
+                        context,
+                        conversationState.createProperty<DialogState>(
+                            'DialogState'
+                        )
+                    );
+                }
+            }
             // By calling next() you ensure that the next BotHandler is run.
             await next();
         });

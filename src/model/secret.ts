@@ -8,4 +8,5 @@ export interface ServerSecret {
     MicrosoftAppId: string;
     MicrosoftAppTenantId: string;
     MicrosoftAppPassword: string;
+    OpenAiApiKey: string;
 }
