@@ -4,7 +4,7 @@ import {
     CloudAdapter,
     ConfigurationServiceClientCredentialFactory,
     ConversationState, createBotFrameworkAuthenticationFromConfiguration,
-    MemoryStorage, ShowTypingMiddleware,
+    MemoryStorage, MemoryTranscriptStore, ShowTypingMiddleware, TranscriptLoggerMiddleware, TranscriptStore,
     UserState,
 } from 'botbuilder';
 
@@ -23,6 +23,7 @@ import { SERVER_SECRET, VEST_DEFAULT_REGION } from './util/constant';
 import { ServerSecret } from './model/secret';
 import { ConfigurationServiceClientCredentialFactoryOptions } from 'botbuilder-core/src/configurationServiceClientCredentialFactory';
 import { DialogBot } from './bots/dialogBot';
+import { MetricsLogger } from './module/MetricsLogger';
 
 
 async function getServerSecret(): Promise<ServerSecret> {
@@ -58,6 +59,7 @@ async function getServerSecret(): Promise<ServerSecret> {
     // See https://aka.ms/about-bot-adapter to learn more about adapters.
     const adapter = new CloudAdapter(botFrameworkAuthentication);
     adapter.use(new ShowTypingMiddleware());
+    adapter.use(new TranscriptLoggerMiddleware((await MetricsLogger.getInstance()).getTranscriptStore()));
 
     // Catch-all for errors.
     const onTurnErrorHandler = async (context, error) => {
@@ -88,9 +90,8 @@ async function getServerSecret(): Promise<ServerSecret> {
 
     // Define a state store for your bot. See https://aka.ms/about-bot-state to learn more about using MemoryStorage.
     // A bot requires a state store to persist the dialog and user state between messages.
-    // For local development, in-memory storage is used.
-    // CAUTION: The Memory Storage used here is for local bot debugging only. When the bot
-    // is restarted, anything stored in memory will be gone.
+    // For local development and MVP, in-memory storage is used.
+    // CAUTION: When the bot is restarted, anything stored in memory will be gone.
     const memoryStorage = new MemoryStorage();
     const conversationState: ConversationState = new ConversationState(
         memoryStorage
@@ -100,7 +101,7 @@ async function getServerSecret(): Promise<ServerSecret> {
     // Create the main dialog.
     const dialog = new MainDialog(
         await new StockResearchRecognizer().init(),
-        new GetFundamentalDialog(Dialog.GET_FUNDAMENTAL)
+        new GetFundamentalDialog()
     );
     const bot = new DialogBot(conversationState, userState, dialog);
 

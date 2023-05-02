@@ -40,8 +40,8 @@ const WATERFALL_DIALOG = 'waterfallDialog';
 export class GetFundamentalDialog extends CancelAndHelpDialog {
     private eodHistoricDataUtil: EodHistoricDataUtil;
 
-    constructor(id: string) {
-        super(id || Dialog.GET_FUNDAMENTAL);
+    constructor() {
+        super(Dialog.GET_FUNDAMENTAL);
 
         this.addDialog(new TextPrompt(PromptName.STOCK_PROMPT, PromptValidatorMap[PromptName.STOCK_PROMPT]))
             .addDialog(

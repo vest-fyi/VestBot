@@ -9,4 +9,7 @@ export interface ServerSecret {
     MicrosoftAppTenantId: string;
     MicrosoftAppPassword: string;
     OpenAiApiKey: string;
+    // metrics logging disabled in alpha environment
+    SheetsApiServiceAccount?: string;
+    SheetsApiPrivateKey?: string;
 }

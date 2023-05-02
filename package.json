@@ -32,6 +32,7 @@
         "botbuilder-ai": "^4.3.4",
         "botbuilder-dialogs": "^4.15.0",
         "dotenv": "^8.2.0",
+        "googleapis": "^118.0.0",
         "openai": "^3.2.1",
         "pino": "^8.11.0",
         "qs": "^6.11.1",

@@ -1,5 +1,6 @@
 {
   "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "id": "welcomeCard",
   "type": "AdaptiveCard",
   "version": "1.0",
   "body": [

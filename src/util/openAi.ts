@@ -79,12 +79,7 @@ export class OpenAi {
                 ],
             });
 
-            logger.debug(response.data, 'response body: ');
-            logger.debug(response.status, 'response status: ');
-            logger.debug(response.headers, 'response headers: ');
-
             const choice = response.data.choices[0];
-
             if (choice.finish_reason.toLowerCase() !== 'stop') {
                 logger.warn(response.data, 'OpenAi.getAnswer() did not finish completely: ');
             }

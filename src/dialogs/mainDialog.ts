@@ -1,5 +1,5 @@
 import {
-    ActivityTypes,
+    ActivityTypes, CardFactory,
     InputHints,
     MessageFactory,
     StatePropertyAccessor,
@@ -22,28 +22,12 @@ import { Dialog } from '../model/dialog';
 import { Intent, IntentUtterance } from '../model/intent';
 import { logger } from '../util/logger';
 import { OpenAi } from '../util/openAi';
+import * as FeedbackCard from '../resources/feedbackCard.json';
 
 const MAIN_WATERFALL_DIALOG = 'mainWaterfallDialog';
 
 export class MainDialog extends ComponentDialog {
     private stockResearchRecognizer: StockResearchRecognizer;
-
-    private validateConstructorParameters(
-        stockResearchRecognizer: StockResearchRecognizer,
-        getFundamentalDialog: GetFundamentalDialog
-    ) {
-        if (!stockResearchRecognizer) {
-            throw new Error(
-                '[MainDialog]: Missing parameter \'stockResearchRecognizer\' is required'
-            );
-        }
-        this.stockResearchRecognizer = stockResearchRecognizer;
-
-        if (!getFundamentalDialog)
-            throw new Error(
-                '[MainDialog]: Missing parameter \'getFundamentalDialog\' is required'
-            );
-    }
 
     constructor(
         stockResearchRecognizer: StockResearchRecognizer,
@@ -86,7 +70,7 @@ export class MainDialog extends ComponentDialog {
 
         const dialogContext = await dialogSet.createContext(context);
 
-        if (this.isWelcomeCardButtonAction(context)) {
+        if (this.isWelcomeCardButtonAction(context)) {  // start a fresh dialog with one of the welcome card actions
             await dialogContext.beginDialog(this.id);
         } else {
             const results = await dialogContext.continueDialog();
@@ -94,11 +78,6 @@ export class MainDialog extends ComponentDialog {
                 await dialogContext.beginDialog(this.id);
             }
         }
-    }
-
-    private isWelcomeCardButtonAction(context: TurnContext): boolean {
-        // TODO: expand other card actions
-        return context.activity.type === 'message' && context.activity.text === IntentUtterance[Intent.GET_FUNDAMENTAL];
     }
 
     /**
@@ -148,7 +127,7 @@ export class MainDialog extends ComponentDialog {
         logger.debug(cluResult, 'CLU result is ');
 
         const confidenceScore = this.stockResearchRecognizer.getTopIntentConfidence(cluResult);
-        if (confidenceScore < 0.9) {
+        if (confidenceScore < 0.85) {
             // use GPT-4 response as fallback
             await turnContext.sendActivity({ type: ActivityTypes.Typing })
 
@@ -160,7 +139,7 @@ export class MainDialog extends ComponentDialog {
                 response,
                 InputHints.IgnoringInput
             );
-            
+
             return await stepContext.next();
         }
 
@@ -195,27 +174,6 @@ export class MainDialog extends ComponentDialog {
         return await stepContext.next();
     }
 
-    // /**
-    //  * Shows a warning if the requested From or To cities are recognized as entities but they are not in the Airport entity list.
-    //  * In some cases LUIS will recognize the From and To composite entities as a valid cities but the From and To Airport values
-    //  * will be empty if those entity values can't be mapped to a canonical item in the Airport.
-    //  */
-    // private async showWarningForUnsupportedCities(context, fromEntities, toEntities) {
-    //     const unsupportedCities = [];
-    //     if (fromEntities.from && !fromEntities.airport) {
-    //         unsupportedCities.push(fromEntities.from);
-    //     }
-    //
-    //     if (toEntities.to && !toEntities.airport) {
-    //         unsupportedCities.push(toEntities.to);
-    //     }
-    //
-    //     if (unsupportedCities.length) {
-    //         const messageText = `Sorry but the following airports are not supported: ${ unsupportedCities.join(', ') }`;
-    //         await context.sendActivity(messageText, messageText, InputHints.IgnoringInput);
-    //     }
-    // }
-
     /**
      * This is the final step in the main waterfall dialog.
      * It wraps up the child dialog interaction with a feedback.
@@ -223,25 +181,34 @@ export class MainDialog extends ComponentDialog {
     private async finalStep(
         stepContext: WaterfallStepContext
     ): Promise<DialogTurnResult> {
-        // TODO: [VES-19] implement feedback collection
-
-        // // If the child dialog ("bookingDialog") was cancelled or the user failed to confirm, the Result here will be null.
-        // if (stepContext.result) {
-        //     const result = stepContext.result as GetFundamentalRequest;
-        //     // Now we have all the booking details.
-        //
-        //     // This is where calls to the booking AOU service or database would go.
-        //
-        //     // If the call to the booking service was successful tell the user.
-        //     const timeProperty = new TimexProperty(result.travelDate);
-        //     const travelDateMsg = timeProperty.toNaturalLanguage(new Date(Date.now()));
-        //     const msg = `I have you booked to ${ result.destination } from ${ result.origin } on ${ travelDateMsg }.`;
-        //     await stepContext.context.sendActivity(msg);
-        // }
+        const feedbackCard = CardFactory.adaptiveCard(FeedbackCard);
+        await stepContext.context.sendActivity({ attachments: [ feedbackCard ] });
 
         // Restart the main dialog waterfall with a different message the second time around
         return await stepContext.replaceDialog(this.initialDialogId, {
             restartMsg: 'What else can I do for you?',
         });
+    }
+
+    private validateConstructorParameters(
+        stockResearchRecognizer: StockResearchRecognizer,
+        getFundamentalDialog: GetFundamentalDialog
+    ) {
+        if (!stockResearchRecognizer) {
+            throw new Error(
+                '[MainDialog]: Missing parameter \'stockResearchRecognizer\' is required'
+            );
+        }
+        this.stockResearchRecognizer = stockResearchRecognizer;
+
+        if (!getFundamentalDialog)
+            throw new Error(
+                '[MainDialog]: Missing parameter \'getFundamentalDialog\' is required'
+            );
+    }
+
+    private isWelcomeCardButtonAction(context: TurnContext): boolean {
+        // TODO: expand other card actions
+        return context.activity.type === 'message' && context.activity.text === IntentUtterance[Intent.GET_FUNDAMENTAL];
     }
 }

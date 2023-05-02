@@ -1,0 +1,80 @@
+{
+    "$schema": "https://adaptivecards.io/schemas/adaptive-card.json",
+    "id": "feedbackCard",
+    "type": "AdaptiveCard",
+    "body": [
+        {
+            "type": "TextBlock",
+            "text": "Was this response helpful?",
+            "wrap": true,
+            "id": "PromptText",
+            "isVisible": true
+        },
+        {
+            "type": "ColumnSet",
+            "isVisible": true,
+            "id": "selectionColumnSet",
+            "columns": [
+                {
+                    "type": "Column",
+                    "width": "stretch",
+                    "items": [
+                        {
+                            "type": "ActionSet",
+                            "actions": [
+                                {
+                                    "type": "Action.Submit",
+                                    "title": "👍",
+                                    "data": {
+                                        "feedback": "POSITIVE"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Column",
+                    "width": "stretch",
+                    "items": [
+                        {
+                            "type": "ActionSet",
+                            "actions": [
+                                {
+                                    "type": "Action.ToggleVisibility",
+                                    "title": "👎",
+                                    "targetElements": [
+                                        "PromptText",
+                                        "selectionColumnSet",
+                                        "feedbackInput",
+                                        "sendFeedbackAction"
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "Input.Text",
+            "id": "feedbackInput",
+            "isVisible": false,
+            "placeholder": "(Optional) Anything else to let us know?"
+        },
+        {
+            "type": "ActionSet",
+            "id": "sendFeedbackAction",
+            "isVisible": false,
+            "actions": [
+                {
+                    "type": "Action.Submit",
+                    "title": "Submit",
+                    "data": {
+                        "feedback": "NEGATIVE"
+                    }
+                }
+            ]
+        }
+    ]
+}

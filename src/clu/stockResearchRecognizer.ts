@@ -95,12 +95,8 @@ export class StockResearchRecognizer {
     ): GetFundamentalDialogParameters {
         const getFundamentalRequest = new GetFundamentalDialogParameters();
 
-        logger.debug(response.result.prediction.topIntent, 'extracting entities in intent: ');
-
         const entities = (response.result.prediction as ConversationPrediction).entities;
         entities.forEach((entity) => {
-            logger.debug(entity, 'extracted entity is: ');
-
             switch (VestUtil.removeCapitalization(entity.category)) {
                 case Entity.STOCK:
                     getFundamentalRequest.symbol = entity.text;

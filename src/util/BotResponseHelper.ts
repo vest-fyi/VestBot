@@ -77,7 +77,7 @@ export abstract class BotResponseHelper {
 //     { name: 'Item 3', price: 30 },
 // ];
 //
-// const card = new AdaptiveCard();
+// const card = new AdaptiveCardType();
 // const textBlock = new TextBlock();
 // textBlock.text = text;
 // card.addItem(textBlock);

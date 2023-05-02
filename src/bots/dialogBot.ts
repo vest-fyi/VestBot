@@ -7,11 +7,15 @@ import {
     ConversationState,
     StatePropertyAccessor,
     UserState,
+    TurnContext
 } from 'botbuilder';
-import { Dialog, DialogState } from 'botbuilder-dialogs';
+import { DialogState } from 'botbuilder-dialogs';
 import { MainDialog } from '../dialogs/mainDialog';
-import { logger } from '../util/logger';
 import * as WelcomeCard from '../resources/welcomeCard.json';
+import { MetricsLogger } from '../module/MetricsLogger';
+import { logger } from '../util/logger';
+import { TranscriptMessage } from '../model/transcriptMessage';
+import { Metric } from '../model/feedbackResponse';
 
 export class DialogBot extends ActivityHandler {
     private conversationState: BotState;
@@ -44,7 +48,11 @@ export class DialogBot extends ActivityHandler {
         this.dialogState = this.conversationState.createProperty<DialogState>('DialogState');
 
         this.onMessage(async (context, next) => {
-            logger.info('Processing Message Activity');
+            if (this.isFeedbackResponse(context)) {
+                // no await for non-blocking logging
+                (await MetricsLogger.getInstance()).logFeedback(context);
+                await context.sendActivity(`Thank you for your feedback! We review your feedback carefully and constantly use it to drive Vest forward.`);
+            }
 
             // Run the Dialog with the new message Activity.
             await this.dialog.run(context, this.dialogState);
@@ -67,7 +75,7 @@ export class DialogBot extends ActivityHandler {
             for (const member of membersAdded) {
                 if (member.id !== context.activity.recipient.id) {
                     const welcomeCard = CardFactory.adaptiveCard(WelcomeCard);
-                    await context.sendActivity({ attachments: [welcomeCard] });
+                    await context.sendActivity({ attachments: [ welcomeCard ] });
 
                     await dialog.run(
                         context,
@@ -80,6 +88,12 @@ export class DialogBot extends ActivityHandler {
             // By calling next() you ensure that the next BotHandler is run.
             await next();
         });
+
+    }
+
+
+    private isFeedbackResponse(context: TurnContext): boolean {
+        return context.activity.value && Object.prototype.hasOwnProperty.call(context.activity.value, 'feedback');
     }
 
 }
