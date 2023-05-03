@@ -128,8 +128,14 @@ async function getServerSecret(): Promise<ServerSecret> {
 
     // Listen for incoming activities and route them to your bot main dialog.
     server.post('/api/messages', async (req, res) => {
+        logger.debug(req, 'Incoming request: ');
         // Route received a request to adapter for processing
-        await adapter.process(req, res, (context) => bot.run(context));
+        await adapter.process(req, res, (context) => {
+            logger.debug(context, 'Adapter processing context: ')
+            return bot.run(context);
+        });
+
+        logger.debug(res, 'Adapter processed response: ');
     });
 
     server.get(healthCheckPath, (req, res) => {
