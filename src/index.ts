@@ -140,9 +140,16 @@ async function getServerSecret(): Promise<ServerSecret> {
         res.send(200, 'OK');
     });
 
-    server.on('after',async (req, res, route, error) => {
-        logger.debug(req, `Processed request to ${route}: `);
-        logger.debug(res, `Request ${req.body} to ${route} had response: `);
-        logger.debug(error, `Request ${req.body} to ${route} had error: `);
+    // also set root path as health check path for Azure Bot Service
+    server.get('/', (req, res) => {
+        res.send(200, 'OK');
     });
+
+    server.on('after',async (req, res, route, error) => {
+        const path = req.url ?? route ?? 'undefined path';
+        logger.debug(req, `Processed request ${req.id} to ${path}: `);
+        logger.debug(res, `Request ${req.id} to ${path} yielded response: `);
+        logger.debug(error, `Request ${req.id} to ${path} yielded error: `);
+    });
+
 })();
