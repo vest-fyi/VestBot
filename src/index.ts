@@ -127,29 +127,35 @@ async function getServerSecret(): Promise<ServerSecret> {
     });
 
     // Listen for incoming activities and route them to your bot main dialog.
-    server.post('/api/messages', async (req, res) => {
+    server.post('/api/messages', async (req, res, next) => {
         logger.debug(req, `Incoming request to ${req}: `);
 
         // Route received a request to adapter for processing
         await adapter.process(req, res, (context) => bot.run(context));
 
         logger.debug(res, 'Adapter processed response: ');
+
+        return next();
     });
 
-    server.get(healthCheckPath, (req, res) => {
+    server.get(healthCheckPath, (req, res, next) => {
         res.send(200, 'OK');
+
+        return next();
     });
 
     // also set root path as health check path for Azure Bot Service
-    server.get('/', (req, res) => {
+    server.get('/', (req, res, next) => {
         res.send(200, 'OK');
+
+        return next();
     });
 
-    server.on('after',async (req, res, route, error) => {
+    server.on('after',(req, res, route, error) => {
         const path = req.url ?? route ?? 'undefined path';
-        logger.debug(req, `Processed request ${req.id} to ${path}: `);
-        logger.debug(res, `Request ${req.id} to ${path} yielded response: `);
-        logger.debug(error, `Request ${req.id} to ${path} yielded error: `);
+        logger.debug(req, `Processed request ${req._id} to ${path}: `);
+        logger.debug(res, `Request ${req._id} to ${path} yielded response: `);
+        logger.debug(error, `Request ${req._id} to ${path} yielded error: `);
     });
 
 })();
