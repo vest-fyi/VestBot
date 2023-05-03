@@ -128,12 +128,10 @@ async function getServerSecret(): Promise<ServerSecret> {
 
     // Listen for incoming activities and route them to your bot main dialog.
     server.post('/api/messages', async (req, res) => {
-        logger.debug(req, 'Incoming request: ');
+        logger.debug(req, `Incoming request to ${req}: `);
+
         // Route received a request to adapter for processing
-        await adapter.process(req, res, (context) => {
-            logger.debug(context, 'Adapter processing context: ')
-            return bot.run(context);
-        });
+        await adapter.process(req, res, (context) => bot.run(context));
 
         logger.debug(res, 'Adapter processed response: ');
     });
@@ -142,4 +140,9 @@ async function getServerSecret(): Promise<ServerSecret> {
         res.send(200, 'OK');
     });
 
+    server.on('after',async (req, res, route, error) => {
+        logger.debug(req, `Processed request to ${route}: `);
+        logger.debug(res, `Request ${req.body} to ${route} had response: `);
+        logger.debug(error, `Request ${req.body} to ${route} had error: `);
+    });
 })();
