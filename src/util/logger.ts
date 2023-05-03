@@ -6,7 +6,7 @@ const stage = process.env.STAGE ?? Stage.LOCAL;
 console.debug('stage', stage);
 const loggerConfig = {
     name: 'VestBot',
-    level: stage === Stage.LOCAL || stage === Stage.ALPHA ? 'debug' : 'info',
+    level: stage === Stage.LOCAL || stage === Stage.ALPHA || stage === Stage.BETA ? 'debug' : 'info',
     ...(stage === Stage.LOCAL && {
         transport: {
             target: 'pino-pretty',
