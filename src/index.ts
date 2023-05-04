@@ -136,25 +136,27 @@ async function getServerSecret(): Promise<ServerSecret> {
         return next();
     });
 
-    server.get(healthCheckPath, (req, res, next) => {
-        res.send(200, 'server is alive');
-
-        return next();
-    });
-
-    // also set /api/messages path as health check path for Azure Bot Service
-    server.get('/api/messages', (req, res, next) => {
+    function endpointAvailableHandler(req, res, next) {
         res.send(200, 'endpoint available');
-
         return next();
-    });
+    }
+
+    server.get(healthCheckPath, endpointAvailableHandler);
+    // also set /api/messages and root path as health check path for Azure Bot Service
+    server.get('/api/messages', endpointAvailableHandler);
+    server.get('/', endpointAvailableHandler);
 
     server.on('after', (req, res, route, error) => {
         const path = req.url ?? route ?? 'undefined path';
+        const requestId = req._id;
         if (path !== healthCheckPath) {
-            logger.debug(req, `Processed request ${req._id} to ${path}: `);
-            logger.debug(res, `Request ${req._id} to ${path} yielded response: `);
-            logger.debug(error, `Request ${req._id} to ${path} yielded error: `);
+            logger.debug(req, `Processed request ${requestId} to ${path}: `);
+            if (res) {
+                logger.debug(res, `Request ${requestId} to ${path} yielded response: `);
+            }
+            if (error) {
+                logger.debug(error, `Request ${requestId} to ${path} yielded error: `);
+            }
         }
     });
 
