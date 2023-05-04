@@ -14,7 +14,6 @@ import { GetFundamentalDialog } from './dialogs/getFundamentalDialog';
 import { config } from 'dotenv';
 import * as path from 'path';
 import { StockResearchRecognizer } from './clu/stockResearchRecognizer';
-import { Dialog } from './model/dialog';
 import { Stage } from './model/stage';
 import { logger } from './util/logger';
 import { SecretsManagerUtil } from './util/secrets-manager';
@@ -24,6 +23,7 @@ import { ServerSecret } from './model/secret';
 import { ConfigurationServiceClientCredentialFactoryOptions } from 'botbuilder-core/src/configurationServiceClientCredentialFactory';
 import { DialogBot } from './bots/dialogBot';
 import { MetricsLogger } from './module/MetricsLogger';
+import corsMiddleware from 'restify-cors-middleware';
 
 
 async function getServerSecret(): Promise<ServerSecret> {
@@ -108,23 +108,21 @@ async function getServerSecret(): Promise<ServerSecret> {
     // Create HTTP server
     const server = restify.createServer();
     server.use(restify.plugins.bodyParser());
+
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     server.use(require('restify-pino-logger')({
         logger: logger,
         autoLogging: false
     }));
 
-    server.listen(process.env.port || process.env.PORT || 3978, () => {
-        logger.info(`Vest bot at ${process.env.STAGE} is ${server.name} listening to ${server.url}`);
-
-        if (process.env.STAGE === Stage.LOCAL) {
-            logger.info(
-                'Get Bot Framework Emulator: https://aka.ms/botframework-emulator'
-            );
-            logger.info('To talk to your bot, open the emulator select "Open Bot"');
-        }
-
+    // TODO: tighten CORS policy [VES-52]
+    const cors = corsMiddleware({
+        origins: [ '*' ],
+        allowHeaders: [],
+        exposeHeaders: []
     });
+    server.pre(cors.preflight);
+    server.use(cors.actual);
 
     // Listen for incoming activities and route them to your bot main dialog.
     server.post('/api/messages', async (req, res, next) => {
@@ -139,23 +137,37 @@ async function getServerSecret(): Promise<ServerSecret> {
     });
 
     server.get(healthCheckPath, (req, res, next) => {
-        res.send(200, 'OK');
+        res.send(200, 'server is alive');
 
         return next();
     });
 
-    // also set root path as health check path for Azure Bot Service
-    server.get('/', (req, res, next) => {
-        res.send(200, 'OK');
+    // also set /api/messages path as health check path for Azure Bot Service
+    server.get('/api/messages', (req, res, next) => {
+        res.send(200, 'endpoint available');
 
         return next();
     });
 
-    server.on('after',(req, res, route, error) => {
+    server.on('after', (req, res, route, error) => {
         const path = req.url ?? route ?? 'undefined path';
-        logger.debug(req, `Processed request ${req._id} to ${path}: `);
-        logger.debug(res, `Request ${req._id} to ${path} yielded response: `);
-        logger.debug(error, `Request ${req._id} to ${path} yielded error: `);
+        if (path !== healthCheckPath) {
+            logger.debug(req, `Processed request ${req._id} to ${path}: `);
+            logger.debug(res, `Request ${req._id} to ${path} yielded response: `);
+            logger.debug(error, `Request ${req._id} to ${path} yielded error: `);
+        }
+    });
+
+    server.listen(process.env.port || process.env.PORT || 3978, () => {
+        logger.info(`Vest bot at ${process.env.STAGE} is ${server.name} listening to ${server.url}`);
+
+        if (process.env.STAGE === Stage.LOCAL) {
+            logger.info(
+                'Get Bot Framework Emulator: https://aka.ms/botframework-emulator'
+            );
+            logger.info('To talk to your bot, open the emulator select "Open Bot"');
+        }
+
     });
 
 })();
