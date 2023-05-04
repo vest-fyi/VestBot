@@ -7,8 +7,9 @@
     "main": "./lib/index.js",
     "scripts": {
         "clean": "rm -rf lib",
+        "clean:dep": "rm -rf node_modules && npm run clean",
         "build": "tsc --build",
-        "install:deploy": "npm ci --omit=dev",
+        "install:deploy": "npm ci --omit=dev --legacy-peer-deps",
         "clean:build": "npm run clean && npm run build",
         "lint": "eslint  --config .eslintrc.json 'src/**/*.ts'",
         "lint:fix": "eslint -c .eslintrc.json --fix --fix-type problem,suggestion,layout ./src",
