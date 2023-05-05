@@ -126,7 +126,8 @@ async function getServerSecret(): Promise<ServerSecret> {
 
     // Listen for incoming activities and route them to your bot main dialog.
     server.post('/api/messages', async (req, res, next) => {
-        logger.debug(req, `Incoming request to ${req}: `);
+        logger.debug(req, `Incoming request: `);
+        logger.debug(req.body, `request body is: `);
 
         // Route received a request to adapter for processing
         await adapter.process(req, res, (context) => bot.run(context));
@@ -151,6 +152,8 @@ async function getServerSecret(): Promise<ServerSecret> {
         const requestId = req._id;
         if (path !== healthCheckPath) {
             logger.debug(req, `Processed request ${requestId} to ${path}: `);
+            logger.debug(req.body, `request body was: `);
+
             if (res) {
                 logger.debug(res, `Request ${requestId} to ${path} yielded response: `);
             }
