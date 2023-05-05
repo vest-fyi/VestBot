@@ -51,7 +51,6 @@ async function getServerSecret(): Promise<ServerSecret> {
             MicrosoftAppId: serverSecret.MicrosoftAppId,
             MicrosoftAppPassword: serverSecret.MicrosoftAppPassword,
             MicrosoftAppType: serverSecret.MicrosoftAppType,
-            MicrosoftAppTenantId: serverSecret.MicrosoftAppTenantId
         } as ConfigurationServiceClientCredentialFactoryOptions));
     }
 
