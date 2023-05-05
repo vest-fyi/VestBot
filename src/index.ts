@@ -29,10 +29,7 @@ import corsMiddleware from 'restify-cors-middleware';
 async function getServerSecret(): Promise<ServerSecret> {
     const secretMgr = new SecretsManagerUtil(new SecretsManagerClient({ region: VEST_DEFAULT_REGION }));
     const serverSecret = await secretMgr.getServerSecret(SERVER_SECRET);
-    // DEBUG
-    console.debug('server secret: ', serverSecret);
-    return serverSecret;
-    // return await secretMgr.getServerSecret(SERVER_SECRET);
+    return await secretMgr.getServerSecret(SERVER_SECRET);
 }
 
 (async () => {
@@ -62,9 +59,6 @@ async function getServerSecret(): Promise<ServerSecret> {
 
     // Catch-all for errors.
     const onTurnErrorHandler = async (context, error) => {
-        // This check writes out errors to console log .vs. app insights.
-        // NOTE: In production environment, you should consider logging this to Azure
-        //       application insights.
         logger.error(error, `\n [onTurnError] unhandled error`);
 
         // Send a trace activity, which will be displayed in Bot Framework Emulator
@@ -80,6 +74,7 @@ async function getServerSecret(): Promise<ServerSecret> {
         await context.sendActivity(
             'To continue to run this bot, please fix the bot source code.'
         );
+
         // Clear out state
         await conversationState.delete(context);
     };
@@ -125,13 +120,12 @@ async function getServerSecret(): Promise<ServerSecret> {
 
     // Listen for incoming activities and route them to your bot main dialog.
     server.post('/api/messages', async (req, res, next) => {
-        logger.debug(req, `Incoming request: `);
-        logger.debug(req.body, `request body is: `);
+        const requestId = req.id();
+        logger.debug(req, `Processing request ${requestId}: `);
+        logger.debug(req.body, `request body of ${requestId} is: `);
 
         // Route received a request to adapter for processing
         await adapter.process(req, res, (context) => bot.run(context));
-
-        logger.debug(res, 'Adapter processed response: ');
 
         return next();
     });
@@ -140,24 +134,17 @@ async function getServerSecret(): Promise<ServerSecret> {
         res.send(200, 'endpoint available');
         return next();
     }
-
     server.get(healthCheckPath, endpointAvailableHandler);
-    // also set /api/messages and root path as health check path for Azure Bot Service
-    server.get('/api/messages', endpointAvailableHandler);
-    server.get('/', endpointAvailableHandler);
 
     server.on('after', (req, res, route, error) => {
         const path = req.url ?? route ?? 'undefined path';
-        const requestId = req._id;
+        const requestId = req.id();
         if (path !== healthCheckPath) {
-            logger.debug(req, `Processed request ${requestId} to ${path}: `);
-            logger.debug(req.body, `request body was: `);
-
             if (res) {
                 logger.debug(res, `Request ${requestId} to ${path} yielded response: `);
             }
             if (error) {
-                logger.debug(error, `Request ${requestId} to ${path} yielded error: `);
+                logger.error(error, `Request ${requestId} to ${path} yielded error: `);
             }
         }
     });
