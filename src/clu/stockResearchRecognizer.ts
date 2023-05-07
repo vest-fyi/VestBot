@@ -40,7 +40,6 @@ export class StockResearchRecognizer {
             const secretMgr = new SecretsManagerUtil(client);
 
             const serverSecret = await secretMgr.getServerSecret(process.env.STAGE == Stage.ALPHA ? BETA_SERVER_SECRET_ARN : SERVER_SECRET);
-            logger.debug(serverSecret, 'serverSecret is');
             cluAPIKey = serverSecret.CluAPIKey;
             cluAPIHostName = serverSecret.CluAPIHostName;
             cluProjectName = serverSecret.CluProjectName;

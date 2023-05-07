@@ -66,10 +66,7 @@ export class EodHistoricDataUtil {
         } else {
             const client = new SecretsManagerClient({ region: VEST_DEFAULT_REGION });
             const secretMgr = new SecretsManagerUtil(client);
-
             const serverSecret = await secretMgr.getServerSecret(process.env.STAGE == Stage.ALPHA ? BETA_SERVER_SECRET_ARN : SERVER_SECRET);
-            logger.debug(serverSecret, 'serverSecret: ');
-
             this.apiToken = serverSecret.EODHistoricalDataAPIKey;
         }
 
