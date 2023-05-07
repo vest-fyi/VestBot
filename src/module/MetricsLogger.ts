@@ -25,6 +25,7 @@ export class MetricsLogger {
 
     public static async getInstance(): Promise<MetricsLogger> {
         if (!MetricsLogger.instance) {
+            logger.debug('Initializing Metrics Logger');
             MetricsLogger.transcriptStore = new MemoryTranscriptStore();
 
             let sheetsApiServiceAccount;
@@ -39,7 +40,6 @@ export class MetricsLogger {
                 const secretMgr = new SecretsManagerUtil(client);
 
                 const serverSecret = await secretMgr.getServerSecret(process.env.STAGE == Stage.ALPHA ? BETA_SERVER_SECRET_ARN : SERVER_SECRET);
-                logger.debug(serverSecret, 'serverSecret: ');
 
                 sheetsApiServiceAccount = serverSecret.SheetsApiServiceAccount;
                 sheetsApiPrivateKey = serverSecret.SheetsApiPrivateKey;
@@ -56,6 +56,8 @@ export class MetricsLogger {
             }
 
             MetricsLogger.instance = new MetricsLogger();
+
+            logger.debug('Successfully initializing Metrics Logger');
         }
 
         return MetricsLogger.instance;
@@ -71,6 +73,7 @@ export class MetricsLogger {
      * @param context turn context
      */
     public async logFeedback(context: TurnContext): Promise<void> {
+        logger.debug('Logging feedback');
         if (!MetricsLogger.logMetrics) {
             return;
         }

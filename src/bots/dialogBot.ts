@@ -13,9 +13,6 @@ import { DialogState } from 'botbuilder-dialogs';
 import { MainDialog } from '../dialogs/mainDialog';
 import * as WelcomeCard from '../resources/welcomeCard.json';
 import { MetricsLogger } from '../module/MetricsLogger';
-import { logger } from '../util/logger';
-import { TranscriptMessage } from '../model/transcriptMessage';
-import { Metric } from '../model/feedbackResponse';
 
 export class DialogBot extends ActivityHandler {
     private conversationState: BotState;
