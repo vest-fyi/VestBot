@@ -4,7 +4,7 @@ import {
     CloudAdapter,
     ConfigurationServiceClientCredentialFactory,
     ConversationState, createBotFrameworkAuthenticationFromConfiguration,
-    MemoryStorage, MemoryTranscriptStore, ShowTypingMiddleware, TranscriptLoggerMiddleware, TranscriptStore,
+    MemoryStorage, ShowTypingMiddleware, TranscriptLoggerMiddleware,
     UserState,
 } from 'botbuilder';
 
@@ -28,7 +28,6 @@ import corsMiddleware from 'restify-cors-middleware';
 
 async function getServerSecret(): Promise<ServerSecret> {
     const secretMgr = new SecretsManagerUtil(new SecretsManagerClient({ region: VEST_DEFAULT_REGION }));
-    const serverSecret = await secretMgr.getServerSecret(SERVER_SECRET);
     return await secretMgr.getServerSecret(SERVER_SECRET);
 }
 
@@ -38,10 +37,17 @@ async function getServerSecret(): Promise<ServerSecret> {
     config({ path: ENV_FILE });
     const healthCheckPath = process.env.HEALTH_CHECK_PATH;
 
-    // for local and alpha, bot is not registered to Azure Bot Service as it requires HTTPS, and thus not capable of Direct Line (Web Chat) for frontend
     let botFrameworkAuthentication;
     if (process.env.STAGE === Stage.LOCAL || process.env.STAGE === Stage.ALPHA) {
-        botFrameworkAuthentication = createBotFrameworkAuthenticationFromConfiguration(null, new ConfigurationServiceClientCredentialFactory());
+        botFrameworkAuthentication = createBotFrameworkAuthenticationFromConfiguration(null, new ConfigurationServiceClientCredentialFactory(
+            // // Disable auth in local environment by default
+                //     {
+                //         MicrosoftAppId: process.env.MicrosoftAppId,
+                //         MicrosoftAppPassword: process.env.MicrosoftAppPassword,
+                //         MicrosoftAppType: process.env.MicrosoftAppType,
+                //     } as ConfigurationServiceClientCredentialFactoryOptions
+            )
+        );
     } else {
         const serverSecret = await getServerSecret();
         botFrameworkAuthentication = createBotFrameworkAuthenticationFromConfiguration(null, new ConfigurationServiceClientCredentialFactory({
@@ -134,6 +140,7 @@ async function getServerSecret(): Promise<ServerSecret> {
         res.send(200, 'endpoint available');
         return next();
     }
+
     server.get(healthCheckPath, endpointAvailableHandler);
 
     server.on('after', (req, res, route, error) => {

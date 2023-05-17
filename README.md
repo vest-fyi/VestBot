@@ -73,6 +73,16 @@ This bot uses [CLU](https://language.cognitive.azure.com/), an AI based cognitiv
 - download ngrok v2  (https://dl.equinox.io/ngrok/ngrok/stable/archive) and configure "Path to ngrok" in Bot Framework Emulator to its location via gear icon at the bottom left 
   - latest ngrok is incompatible https://github.com/microsoft/BotFramework-Emulator/pull/2399 
 
+### Connecting to local bot via Bot Service
+When you need to route frontend to the local version of backend, it needs to go through Azure Bot Service
+1. Setup a local bot instance in https://portal.azure.com/#create/Microsoft.AzureBot
+2. Configure its App ID and App Password, store them in the .env file 
+3. Setup ngrok to forward to localhost:8080 via  `ngrok http 8080 --host-header rewrite`
+4. Set up the ngrok endpoint in Bot Service's Messaging endpoint
+5. Test in Bot Framework Emulator with the endpoint `https://<ngrok endpoint>/api/messages` and appropriate App ID and App Password.
+6. Configure Webchat Secret (get from Bot Service -> Channel) in your frontend 
+7. Test in Frontend with the Webchat Secret
+
 ## Further reading
 
 - [Bot Framework Documentation](https://docs.botframework.com)

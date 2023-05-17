@@ -88,7 +88,6 @@ export class DialogBot extends ActivityHandler {
 
     }
 
-
     private isFeedbackResponse(context: TurnContext): boolean {
         return context.activity.value && Object.prototype.hasOwnProperty.call(context.activity.value, 'feedback');
     }
