@@ -28,7 +28,6 @@ export class CloudFrontStack extends Stack {
 
         // only available for non-alpha stages
         const hostedZone = dns?.hostedZone;
-        const acmCertificate = dns?.acmCertificate;
 
         const distribution = new Distribution(this, 'StaticContentDistribution', {
             defaultBehavior: {
@@ -41,7 +40,6 @@ export class CloudFrontStack extends Stack {
             enableIpv6: true,
             ...stage !== STAGE.ALPHA && {
                 domainNames: [ `${this.STATIC_SUBDOMAIN}.${hostedZone!.zoneName}` ],
-                certificate: acmCertificate!,
             }
         });
 

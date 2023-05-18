@@ -13,6 +13,8 @@ import { DialogState } from 'botbuilder-dialogs';
 import { MainDialog } from '../dialogs/mainDialog';
 import * as WelcomeCard from '../resources/welcomeCard.json';
 import { MetricsLogger } from '../module/MetricsLogger';
+import { Attachment } from 'botframework-schema';
+import { Stage } from '../model/stage';
 
 export class DialogBot extends ActivityHandler {
     private conversationState: BotState;
@@ -71,7 +73,7 @@ export class DialogBot extends ActivityHandler {
             const membersAdded = context.activity.membersAdded;
             for (const member of membersAdded) {
                 if (member.id !== context.activity.recipient.id) {
-                    const welcomeCard = CardFactory.adaptiveCard(WelcomeCard);
+                    const welcomeCard = this.updateWelcomeCardImageUrl(CardFactory.adaptiveCard(WelcomeCard));
                     await context.sendActivity({ attachments: [ welcomeCard ] });
 
                     await dialog.run(
@@ -90,6 +92,15 @@ export class DialogBot extends ActivityHandler {
 
     private isFeedbackResponse(context: TurnContext): boolean {
         return context.activity.value && Object.prototype.hasOwnProperty.call(context.activity.value, 'feedback');
+    }
+
+    private updateWelcomeCardImageUrl(card: Attachment): Attachment {
+        const stage = process.env.STAGE;
+        if (stage !== Stage.ALPHA) {
+            card.content.body[0].url = `https://static.bot.${process.env.STAGE}.us-west-2.api.vest.fyi.xx.vest.fyi/vest-icon.png`;
+        }
+
+        return card;
     }
 
 }
