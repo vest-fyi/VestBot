@@ -1,4 +1,4 @@
-import { Stack } from 'aws-cdk-lib';
+import { Environment, Stack } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { StackCreationInfo } from 'vest-common-cdk';
 import { DnsStack } from './dns';
@@ -7,6 +7,8 @@ import { createAcmCertificate } from '../../util';
 
 export interface USE1ResourcesStackProps {
     readonly dns: DnsStack;    // dns is skipped for alpha stack
+    readonly env: Environment;
+    readonly crossRegionReferences: boolean;
     readonly stackCreationInfo: StackCreationInfo;
     readonly terminationProtection?: boolean;
 }
@@ -23,6 +25,5 @@ export class USE1ResourcesStack extends Stack {
             dns.serviceHostedZone,
             `${props.stackCreationInfo.stackPrefix}-CloudFrontCertificate`,
             `*.${dns.serviceHostedZone.zoneName}`);
-
     }
 }

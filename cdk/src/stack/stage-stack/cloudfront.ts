@@ -13,6 +13,7 @@ export interface CloudFrontStackProps {
     readonly dnsStack?: DnsStack;    // dns is skipped for alpha stack
     readonly s3Stack: S3Stack;
     readonly stackCreationInfo: StackCreationInfo;
+    readonly crossRegionReferences: boolean;
     readonly terminationProtection?: boolean;
 }
 

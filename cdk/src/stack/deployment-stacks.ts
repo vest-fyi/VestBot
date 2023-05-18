@@ -49,6 +49,7 @@ export class DeploymentStacks extends Stage {
         if (enableHttps) {
             this.dns = new DnsStack(this, `${stackPrefix}-Dns`, {
                 stackCreationInfo,
+                crossRegionReferences: true,
                 terminationProtection,
             });
         }
@@ -72,10 +73,14 @@ export class DeploymentStacks extends Stage {
 
         const use1StackCreationInfo = stackCreationInfo;
         use1StackCreationInfo.region = 'us-east-1';
-
         if (stage !== STAGE.ALPHA) {
             this.use1Resources = new USE1ResourcesStack(this, `${stackPrefix}-USE1Resources`, {
                 dns: this.dns!,
+                env: {
+                    account: props.env.account,
+                    region: 'us-east-1',
+                },
+                crossRegionReferences: true,
                 stackCreationInfo: use1StackCreationInfo,
                 terminationProtection,
             });
@@ -86,6 +91,7 @@ export class DeploymentStacks extends Stage {
             dnsStack: this.dns,
             s3Stack: this.s3,
             stackCreationInfo,
+            crossRegionReferences: true,
             terminationProtection,
         });
     }

@@ -6,7 +6,7 @@ import {
   STAGELESS_SERVICE,
 } from 'vest-common-cdk';
 import { Stack } from 'aws-cdk-lib';
-import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
+import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { Role } from 'aws-cdk-lib/aws-iam';
 import { CrossAccountZoneDelegationRecord, PublicHostedZone } from 'aws-cdk-lib/aws-route53';
 import { Construct } from 'constructs';
@@ -16,6 +16,7 @@ import { createAcmCertificate } from '../../util';
 
 export interface DnsStackProps {
   readonly stackCreationInfo: StackCreationInfo;
+  readonly crossRegionReferences: boolean;
   readonly terminationProtection?: boolean;
 }
 
