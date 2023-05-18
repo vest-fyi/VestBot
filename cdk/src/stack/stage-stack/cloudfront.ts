@@ -6,8 +6,10 @@ import { AllowedMethods, Distribution } from 'aws-cdk-lib/aws-cloudfront';
 import { DnsStack } from './dns';
 import { S3Stack } from './s3';
 import { BucketDeployment, Source } from 'aws-cdk-lib/aws-s3-deployment';
+import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
 
 export interface CloudFrontStackProps {
+    readonly cloudFrontCertificate?: Certificate;    // dns is skipped for alpha stack
     readonly dns?: DnsStack;    // dns is skipped for alpha stack
     readonly s3: S3Stack;
     readonly stackCreationInfo: StackCreationInfo;
@@ -27,7 +29,7 @@ export class CloudFrontStack extends Stack {
         const { staticContentBucket, cloudFrontLogBucket, originAccessIdentity } = s3;
 
         // only available for non-alpha stages
-        const hostedZone = dns?.hostedZone;
+        const hostedZone = dns?.serviceHostedZone;
 
         const distribution = new Distribution(this, 'StaticContentDistribution', {
             defaultBehavior: {

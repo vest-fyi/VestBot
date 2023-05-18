@@ -11,6 +11,7 @@ import { Role } from 'aws-cdk-lib/aws-iam';
 import { CrossAccountZoneDelegationRecord, PublicHostedZone } from 'aws-cdk-lib/aws-route53';
 import { Construct } from 'constructs';
 import { SERVICE_NAME } from '../../constant';
+import { createAcmCertificate } from '../../util';
 
 
 export interface DnsStackProps {
@@ -19,15 +20,16 @@ export interface DnsStackProps {
 }
 
 export class DnsStack extends Stack {
-  public readonly hostedZone: PublicHostedZone;
-  public readonly acmCertificate: Certificate;
+  public readonly serviceHostedZone: PublicHostedZone;
+  public readonly ecsCertificate: Certificate;
+
 
   constructor(scope: Construct, id: string, props: DnsStackProps) {
     super(scope, id, props);
 
-    this.hostedZone = this.createDelegatedHostedZoneForService(props.stackCreationInfo);
+    this.serviceHostedZone = this.createDelegatedHostedZoneForService(props.stackCreationInfo);
 
-    this.acmCertificate = this.createAcmCertificate(this.hostedZone, `${ props.stackCreationInfo.stackPrefix }-EcsCertificate`);
+    this.ecsCertificate = createAcmCertificate(this, this.serviceHostedZone, `${ props.stackCreationInfo.stackPrefix }-EcsCertificate`);
   }
 
   // delegate from parent Hosted Zone in DNS account
@@ -61,14 +63,6 @@ export class DnsStack extends Stack {
     });
 
     return subZone;
-  }
-
-  private createAcmCertificate(hostedZone: PublicHostedZone, certificateName: string): Certificate {
-    return new Certificate(this, certificateName, {
-      domainName: hostedZone.zoneName,
-      certificateName: certificateName,
-      validation: CertificateValidation.fromDns(hostedZone),
-    });
   }
 
 }

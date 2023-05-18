@@ -7,6 +7,7 @@ import { SecretStack } from './stage-stack/secret';
 import { S3Stack } from './stage-stack/s3';
 import { VpcStack } from './stage-stack/vpc';
 import { CloudFrontStack } from './stage-stack/cloudfront';
+import { USE1ResourcesStack } from './stage-stack/use1-resources';
 
 export interface DeploymentStacksProps extends StackProps {
     readonly stackCreationInfo: StackCreationInfo;
@@ -19,6 +20,7 @@ export class DeploymentStacks extends Stage {
     public readonly dns?: DnsStack;
     public readonly ecs: EcsServiceStack;
     public readonly secret: SecretStack;
+    public readonly use1Resources: USE1ResourcesStack;
     public readonly cloudfront: CloudFrontStack;
 
     constructor(scope: Construct, id: string, props: DeploymentStacksProps) {
@@ -60,7 +62,7 @@ export class DeploymentStacks extends Stage {
             terminationProtection,
         });
 
-        if(deploySecret){
+        if (deploySecret) {
             this.secret = new SecretStack(this, `${stackPrefix}-Secret`, {
                 stackCreationInfo,
                 terminationProtection,
@@ -68,12 +70,23 @@ export class DeploymentStacks extends Stage {
             this.ecs.addDependency(this.secret);
         }
 
+        const use1StackCreationInfo = stackCreationInfo;
+        use1StackCreationInfo.region = 'us-east-1';
+
+        if (stage !== STAGE.ALPHA) {
+            this.use1Resources = new USE1ResourcesStack(this, `${stackPrefix}-USE1Resources`, {
+                dns: this.dns!,
+                stackCreationInfo: use1StackCreationInfo,
+                terminationProtection,
+            });
+        }
+
         this.cloudfront = new CloudFrontStack(this, `${stackPrefix}-CloudFront`, {
+            cloudFrontCertificate: this.use1Resources?.cloudFrontCertificate,
             dns: this.dns,
             s3: this.s3,
             stackCreationInfo,
             terminationProtection,
         });
-
     }
 }

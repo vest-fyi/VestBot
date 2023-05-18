@@ -51,7 +51,7 @@ export class EcsServiceStack extends Stack {
 
         const serviceExecutionRole = this.createServiceExecutionRole();
 
-        const serviceHostedZone = props.enableHttps ? props.dns?.hostedZone : undefined;
+        const serviceHostedZone = props.enableHttps ? props.dns?.serviceHostedZone : undefined;
         const INTERNAL_HTTP_PORT = 8080;
         const HTTP_PORT = 80;
         const HTTPS_PORT = 443;
@@ -111,7 +111,7 @@ export class EcsServiceStack extends Stack {
             targetProtocol: ApplicationProtocol.HTTP, // ALB to server
             protocol: props.enableHttps ? ApplicationProtocol.HTTPS : ApplicationProtocol.HTTP, // client to ALB
             listenerPort: props.enableHttps ? HTTPS_PORT : HTTP_PORT,
-            certificate: props.enableHttps ? props.dns?.acmCertificate : undefined,
+            certificate: props.enableHttps ? props.dns?.ecsCertificate : undefined,
             domainName: props.enableHttps ? serviceHostedZone?.zoneName : undefined,
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             domainZone: props.enableHttps ? serviceHostedZone! : undefined,
