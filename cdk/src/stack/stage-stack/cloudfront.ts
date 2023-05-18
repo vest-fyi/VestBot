@@ -10,8 +10,8 @@ import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
 
 export interface CloudFrontStackProps {
     readonly cloudFrontCertificate?: Certificate;    // dns is skipped for alpha stack
-    readonly dns?: DnsStack;    // dns is skipped for alpha stack
-    readonly s3: S3Stack;
+    readonly dnsStack?: DnsStack;    // dns is skipped for alpha stack
+    readonly s3Stack: S3Stack;
     readonly stackCreationInfo: StackCreationInfo;
     readonly terminationProtection?: boolean;
 }
@@ -24,12 +24,12 @@ export class CloudFrontStack extends Stack {
     constructor(scope: Construct, id: string, props: CloudFrontStackProps) {
         super(scope, id, props);
         this.props = props;
-        const { dns, s3, stackCreationInfo } = props;
+        const { dnsStack, s3Stack, stackCreationInfo } = props;
         const { stage } = stackCreationInfo;
-        const { staticContentBucket, cloudFrontLogBucket, originAccessIdentity } = s3;
+        const { staticContentBucket, cloudFrontLogBucket, originAccessIdentity } = s3Stack;
 
         // only available for non-alpha stages
-        const hostedZone = dns?.serviceHostedZone;
+        const hostedZone = dnsStack?.serviceHostedZone;
 
         const distribution = new Distribution(this, 'StaticContentDistribution', {
             defaultBehavior: {
@@ -42,6 +42,7 @@ export class CloudFrontStack extends Stack {
             enableIpv6: true,
             ...stage !== STAGE.ALPHA && {
                 domainNames: [ `${this.STATIC_SUBDOMAIN}.${hostedZone!.zoneName}` ],
+                certificate: props.cloudFrontCertificate!,
             }
         });
 

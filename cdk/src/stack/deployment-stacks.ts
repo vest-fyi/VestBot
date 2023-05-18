@@ -83,8 +83,8 @@ export class DeploymentStacks extends Stage {
 
         this.cloudfront = new CloudFrontStack(this, `${stackPrefix}-CloudFront`, {
             cloudFrontCertificate: this.use1Resources?.cloudFrontCertificate,
-            dns: this.dns,
-            s3: this.s3,
+            dnsStack: this.dns,
+            s3Stack: this.s3,
             stackCreationInfo,
             terminationProtection,
         });
