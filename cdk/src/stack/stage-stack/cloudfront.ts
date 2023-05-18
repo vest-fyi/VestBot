@@ -17,6 +17,8 @@ export interface CloudFrontStackProps {
 export class CloudFrontStack extends Stack {
     private readonly props: CloudFrontStackProps;
 
+    private readonly STATIC_SUBDOMAIN = 'static';
+
     constructor(scope: Construct, id: string, props: CloudFrontStackProps) {
         super(scope, id, props);
         this.props = props;
@@ -38,7 +40,7 @@ export class CloudFrontStack extends Stack {
             logBucket: cloudFrontLogBucket,
             enableIpv6: true,
             ...stage !== STAGE.ALPHA && {
-                domainNames: [ hostedZone!.zoneName ],
+                domainNames: [ `${this.STATIC_SUBDOMAIN}.${hostedZone!.zoneName}` ],
                 certificate: acmCertificate!,
             }
         });
