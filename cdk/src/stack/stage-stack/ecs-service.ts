@@ -117,7 +117,7 @@ export class EcsServiceStack extends Stack {
             domainZone: props.enableHttps ? serviceHostedZone! : undefined,
         });
 
-        service.loadBalancer.logAccessLogs(props.s3.elbAccessLogBucket);
+        service.loadBalancer.logAccessLogs(props.s3.staticContentBucket);
 
         service.targetGroup.configureHealthCheck({
             path: HEALTH_CHECK_PATH,

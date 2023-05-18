@@ -6,6 +6,7 @@ import { EcsServiceStack } from './stage-stack/ecs-service';
 import { SecretStack } from './stage-stack/secret';
 import { S3Stack } from './stage-stack/s3';
 import { VpcStack } from './stage-stack/vpc';
+import { CloudFrontStack } from './stage-stack/cloudfront';
 
 export interface DeploymentStacksProps extends StackProps {
     readonly stackCreationInfo: StackCreationInfo;
@@ -18,6 +19,7 @@ export class DeploymentStacks extends Stage {
     public readonly dns?: DnsStack;
     public readonly ecs: EcsServiceStack;
     public readonly secret: SecretStack;
+    public readonly cloudfront: CloudFrontStack;
 
     constructor(scope: Construct, id: string, props: DeploymentStacksProps) {
         super(scope, id, props);
@@ -65,6 +67,13 @@ export class DeploymentStacks extends Stage {
             });
             this.ecs.addDependency(this.secret);
         }
+
+        this.cloudfront = new CloudFrontStack(this, `${stackPrefix}-CloudFront`, {
+            dns: this.dns,
+            s3: this.s3,
+            stackCreationInfo,
+            terminationProtection,
+        });
 
     }
 }
