@@ -97,8 +97,12 @@ export class DialogBot extends ActivityHandler {
     private updateWelcomeCardImageUrl(card: Attachment): Attachment {
         const stage = process.env.STAGE;
         if (stage !== Stage.ALPHA) {
-            card.content.body[0].url = `https://static.bot.${process.env.STAGE}.us-west-2.api.vest.fyi.xx.vest.fyi/vest-icon.png`;
+            // TODO: update the image url once CloudFront is fixed
+            // card.content.body[0].url = `https://static.bot.${process.env.STAGE}.us-west-2.api.vest.fyi.xx.vest.fyi/vest-icon.png`;
+            // remove first object of body array
+            card.content.body.shift();
         }
+
 
         return card;
     }
