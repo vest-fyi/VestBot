@@ -4,6 +4,7 @@ import { StackCreationInfo } from 'vest-common-cdk';
 import { DnsStack } from './dns';
 import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { createAcmCertificate } from '../../util';
+import { STATIC_SUBDOMAIN } from '../../constant';
 
 export interface USE1ResourcesStackProps {
     readonly dns: DnsStack;    // dns is skipped for alpha stack
@@ -24,6 +25,6 @@ export class USE1ResourcesStack extends Stack {
             this,
             dns.serviceHostedZone,
             `${props.stackCreationInfo.stackPrefix}-CloudFrontCertificate`,
-            `*.${dns.serviceHostedZone.zoneName}`);
+            `${STATIC_SUBDOMAIN}.${dns.serviceHostedZone.zoneName}`);
     }
 }

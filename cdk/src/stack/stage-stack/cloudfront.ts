@@ -7,6 +7,7 @@ import { DnsStack } from './dns';
 import { S3Stack } from './s3';
 import { BucketDeployment, Source } from 'aws-cdk-lib/aws-s3-deployment';
 import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
+import { STATIC_SUBDOMAIN } from '../../constant';
 
 export interface CloudFrontStackProps {
     readonly cloudFrontCertificate?: Certificate;    // dns is skipped for alpha stack
@@ -19,8 +20,6 @@ export interface CloudFrontStackProps {
 
 export class CloudFrontStack extends Stack {
     private readonly props: CloudFrontStackProps;
-
-    private readonly STATIC_SUBDOMAIN = 'static';
 
     constructor(scope: Construct, id: string, props: CloudFrontStackProps) {
         super(scope, id, props);
@@ -42,7 +41,7 @@ export class CloudFrontStack extends Stack {
             logBucket: cloudFrontLogBucket,
             enableIpv6: true,
             ...stage !== STAGE.ALPHA && {
-                domainNames: [ `${this.STATIC_SUBDOMAIN}.${hostedZone!.zoneName}` ],
+                domainNames: [ `${STATIC_SUBDOMAIN}.${hostedZone!.zoneName}` ],
                 certificate: props.cloudFrontCertificate!,
             }
         });
