@@ -41,6 +41,7 @@ export class CloudFrontStack extends Stack {
             logBucket: cloudFrontLogBucket,
             enableIpv6: true,
             ...stage !== STAGE.ALPHA && {
+                // even though this is supposed to also create the alias record of the custom domain name, it did not. It is currently done manually in Route53
                 domainNames: [ `${STATIC_SUBDOMAIN}.${hostedZone!.zoneName}` ],
                 certificate: props.cloudFrontCertificate!,
             }
