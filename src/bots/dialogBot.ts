@@ -95,10 +95,12 @@ export class DialogBot extends ActivityHandler {
     }
 
     private updateWelcomeCardImageUrl(card: Attachment): Attachment {
-        const stage = process.env.STAGE;
-        if (stage !== Stage.ALPHA) {
-            card.content.body[0].url = `https://static.bot.${process.env.STAGE}.us-west-2.api.vest.fyi.xx.vest.fyi/vest-icon.png`;
+        let stage = process.env.STAGE;
+        if (stage === Stage.ALPHA || stage === Stage.LOCAL) {
+            stage = 'beta';
         }
+        card.content.body[0].url = `https://static.bot.${stage}.us-west-2.api.vest.fyi/vest-icon.png`;
+
         return card;
     }
 
