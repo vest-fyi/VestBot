@@ -62,7 +62,7 @@ export class EcsServiceStack extends Stack {
             clusterName: `${stackPrefix}-${SERVICE_NAME}-Cluster`,
             vpc: props.vpc.vpc,
             enableFargateCapacityProviders: true,
-            containerInsights: true,
+            // containerInsights: true, // while CPU and memory utilization metrics is nice to have, this is too costly. enable when encounter scaling issue
         });
 
         // TODO: enable ssh key pass in when src code require private repo
